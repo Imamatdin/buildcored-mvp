@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.*
+.DS_Store
+.idea/
+.vscode/
+*.log
+npm-debug.log*
+pnpm-lock.yaml
+package-lock.json
+/.pnp/
+.cache/
+/.turbo/
+.env.local
+.vercel
