@@ -15,7 +15,7 @@ const Index = () => {
       {/* Hero Section */}
       <section className="h-screen snap-start flex flex-col relative shrink-0">
         {/* Logo at top - absolute so it doesn't affect text centering */}
-        <div className="absolute top-16 left-0 right-0 px-6 flex justify-center">
+        <div className="absolute top-8 left-0 right-0 px-6 flex justify-center">
           <img src="/logo.svg" alt="Buildcored" className="h-64 md:h-72 w-auto" />
         </div>
 
