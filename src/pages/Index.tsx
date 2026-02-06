@@ -15,8 +15,8 @@ const Index = () => {
       {/* Hero Section */}
       <section className="h-screen snap-start flex flex-col relative shrink-0">
         {/* Logo at top - centered */}
-        <div className="pt-12 px-6 flex justify-center">
-          <img src="/logo.svg" alt="Buildcored" className="h-12 md:h-16 w-auto" />
+        <div className="pt-16 px-6 flex justify-center">
+          <img src="/logo.svg" alt="Buildcored" className="h-64 md:h-72 w-auto" />
         </div>
 
         {/* Center Text */}
