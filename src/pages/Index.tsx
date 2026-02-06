@@ -14,12 +14,9 @@ const Index = () => {
     <main className="h-screen overflow-y-auto snap-y snap-mandatory relative">
       {/* Hero Section */}
       <section className="h-screen snap-start flex flex-col relative shrink-0">
-        {/* Logo + BUILDCORED - centered on mobile, left on desktop */}
+        {/* Logo - centered on mobile, left on desktop */}
         <div className="pt-12 px-6 flex justify-center md:justify-start md:pl-12">
-          <div className="flex items-center gap-3">
-            <img src="/logo.svg" alt="Buildcored" className="h-8 w-auto" />
-            <span className="text-white font-semibold tracking-wide text-lg">BUILDCORED</span>
-          </div>
+          <img src="/logo.svg" alt="Buildcored" className="h-32 md:h-40 w-auto" />
         </div>
 
         {/* Center Text */}
