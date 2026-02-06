@@ -14,12 +14,12 @@ const Index = () => {
     <main className="h-screen overflow-y-auto snap-y snap-mandatory relative">
       {/* Hero Section */}
       <section className="h-screen snap-start flex flex-col relative shrink-0">
-        {/* Logo at top - centered */}
-        <div className="pt-16 px-6 flex justify-center">
+        {/* Logo at top - absolute so it doesn't affect text centering */}
+        <div className="absolute top-16 left-0 right-0 px-6 flex justify-center">
           <img src="/logo.svg" alt="Buildcored" className="h-64 md:h-72 w-auto" />
         </div>
 
-        {/* Center Text */}
+        {/* Center Text - vertically centered */}
         <div className="flex-1 flex items-center justify-center px-6">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-light text-center max-w-4xl leading-tight tracking-tight">
             <span className="text-muted-foreground">open source for</span>
