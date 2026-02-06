@@ -156,24 +156,6 @@ const Index = () => {
             </Link>
           </section>
 
-          {/* CTA */}
-          <section className="bg-card border border-border rounded-lg p-8 md:p-12 text-center">
-            <h2 className="text-2xl font-bold text-foreground mb-4">
-              Ready to show what you can do?
-            </h2>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Pick a problem, share your reasoning, and let your thinking open
-              doors.
-            </p>
-            <Link
-              to="/problems"
-              className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-black bg-white hover:bg-white/90 transition"
-            >
-              Start Now
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </section>
-
           {/* Email Signup Footer */}
           <section className="mt-16 text-center">
             <p className="text-muted-foreground text-sm mb-4">
