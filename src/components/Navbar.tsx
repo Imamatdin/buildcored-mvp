@@ -33,14 +33,6 @@ export default function Navbar() {
     <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[90vw]">
       {/* Glassy container with brand + nav */}
       <div className="flex items-center gap-4 rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-md">
-        {/* Logo + BUILDCORED text */}
-        <Link
-          to="/"
-          className="flex items-center pr-4 border-r border-white/10"
-        >
-          <Logo className="h-8 w-auto" src="/logo-text.svg" alt="Buildcored" />
-        </Link>
-
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center">
           {NAV_ITEMS.map((item) => (
