@@ -38,7 +38,7 @@ export default function Companies() {
   };
 
   return (
-    <main className="h-screen overflow-y-auto snap-y snap-mandatory">
+    <main className="min-h-screen overflow-y-auto">
       <section className="min-h-screen snap-start flex flex-col pt-20">
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
           <div className="max-w-2xl w-full space-y-8">
