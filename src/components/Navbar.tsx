@@ -36,10 +36,9 @@ export default function Navbar() {
         {/* Logo + BUILDCORED text */}
         <Link
           to="/"
-          className="flex items-center gap-3 pr-4 border-r border-white/10"
+          className="flex items-center pr-4 border-r border-white/10"
         >
-          <Logo className="h-10 w-auto" src="/logo.svg" alt="Buildcored logo" />
-          <span className="text-white font-semibold tracking-wide text-lg">BUILDCORED</span>
+          <Logo className="h-8 w-auto" src="/logo-text.svg" alt="Buildcored" />
         </Link>
 
         {/* Desktop Navigation */}
