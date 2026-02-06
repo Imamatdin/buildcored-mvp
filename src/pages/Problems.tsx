@@ -17,7 +17,8 @@ const ICONS: Record<number, React.ReactNode> = {
 
 export default function Problems() {
   return (
-    <main className="min-h-screen bg-background pt-20 overflow-y-auto">
+    <main className="h-screen overflow-y-auto snap-y snap-mandatory">
+      <section className="min-h-screen snap-start pt-20">
         <div className="max-w-5xl mx-auto px-6 py-12">
           {/* Header */}
           <header className="mb-12 text-center">
@@ -91,6 +92,7 @@ export default function Problems() {
             </div>
           </section>
         </div>
-      </main>
+      </section>
+    </main>
   );
 }

@@ -3,7 +3,8 @@ import { ArrowRight, Zap, Shield, Eye, Trophy } from "lucide-react";
 
 export default function Engineers() {
   return (
-    <main className="min-h-screen bg-background pt-20 overflow-y-auto">
+    <main className="h-screen overflow-y-auto snap-y snap-mandatory">
+      <section className="min-h-screen snap-start pt-20">
         <div className="max-w-5xl mx-auto px-6 py-12">
           {/* Hero */}
           <header className="mb-16 text-center">
@@ -137,6 +138,7 @@ export default function Engineers() {
             </Link>
           </section>
         </div>
-      </main>
+      </section>
+    </main>
   );
 }

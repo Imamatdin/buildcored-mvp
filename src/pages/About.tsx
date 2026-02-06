@@ -3,7 +3,8 @@ import { ArrowRight, Code, Lightbulb, Users, Sparkles } from "lucide-react";
 
 export default function About() {
   return (
-    <main className="min-h-screen bg-background pt-20">
+    <main className="h-screen overflow-y-auto snap-y snap-mandatory">
+      <section className="min-h-screen snap-start pt-20">
         <div className="max-w-4xl mx-auto px-6 py-12">
           {/* Hero */}
           <header className="mb-16 text-center">
@@ -145,6 +146,7 @@ export default function About() {
             </div>
           </section>
         </div>
-      </main>
+      </section>
+    </main>
   );
 }
