@@ -202,6 +202,147 @@ export function apiPlugin(): Plugin {
         });
       });
 
+      // Public: Get showcase projects
+      server.middlewares.use('/api/showcase', async (req, res, next) => {
+        if (req.method !== 'GET') return next();
+
+        try {
+          const { data, error } = await getSupabaseClient()
+            .from('showcase_projects')
+            .select('*')
+            .order('featured', { ascending: false })
+            .order('display_order', { ascending: true })
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(data));
+        } catch (e) {
+          console.error(e);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: 'Server error' }));
+        }
+      });
+
+      // Admin: CRUD showcase projects
+      server.middlewares.use('/api/admin/showcase', async (req, res) => {
+        const password = req.headers['x-admin-password'] as string;
+        if (!process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD) {
+          res.statusCode = 401;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: 'Unauthorized' }));
+          return;
+        }
+
+        const supabase = getSupabaseClient();
+
+        if (req.method === 'GET') {
+          try {
+            const { data, error } = await supabase
+              .from('showcase_projects')
+              .select('*')
+              .order('display_order', { ascending: true })
+              .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify(data));
+          } catch (e) {
+            console.error(e);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Server error' }));
+          }
+          return;
+        }
+
+        // Parse body for POST/PUT/DELETE
+        let body = '';
+        req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
+        req.on('end', async () => {
+          try {
+            const parsed = body ? JSON.parse(body) : {};
+
+            if (req.method === 'POST') {
+              if (!parsed.title || !parsed.description) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'Title and description required' }));
+                return;
+              }
+
+              const { data, error } = await supabase
+                .from('showcase_projects')
+                .insert({
+                  title: parsed.title,
+                  description: parsed.description,
+                  image_url: parsed.image_url || null,
+                  repo_url: parsed.repo_url || null,
+                  live_url: parsed.live_url || null,
+                  tags: parsed.tags || [],
+                  author_name: parsed.author_name || null,
+                  featured: parsed.featured || false,
+                  display_order: parsed.display_order || 0,
+                })
+                .select()
+                .single();
+
+              if (error) throw error;
+              res.statusCode = 201;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify(data));
+              return;
+            }
+
+            if (req.method === 'PUT') {
+              const { id, ...updates } = parsed;
+              if (!id) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'ID required' }));
+                return;
+              }
+
+              const { data, error } = await supabase
+                .from('showcase_projects')
+                .update({ ...updates, updated_at: new Date().toISOString() })
+                .eq('id', id)
+                .select()
+                .single();
+
+              if (error) throw error;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify(data));
+              return;
+            }
+
+            if (req.method === 'DELETE') {
+              const url = new URL(req.url || '', 'http://localhost');
+              const id = url.searchParams.get('id') || parsed.id;
+              if (!id) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'ID required' }));
+                return;
+              }
+
+              const { error } = await supabase
+                .from('showcase_projects')
+                .delete()
+                .eq('id', id);
+
+              if (error) throw error;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ success: true }));
+              return;
+            }
+
+            res.statusCode = 405;
+            res.end(JSON.stringify({ error: 'Method not allowed' }));
+          } catch (e) {
+            console.error(e);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Server error' }));
+          }
+        });
+      });
+
       // Request Interview (Mock for local dev)
       server.middlewares.use('/api/request-interview', async (req, res, next) => {
         if (req.method !== 'POST') return next();

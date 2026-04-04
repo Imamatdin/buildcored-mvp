@@ -14,3 +14,5 @@ package-lock.json
 /.turbo/
 .env.local
 .vercel
+.vite/
+.claude/

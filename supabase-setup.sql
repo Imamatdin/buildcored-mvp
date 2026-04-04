@@ -17,6 +17,23 @@ CREATE TABLE IF NOT EXISTS interview_requests (
   created_at timestamptz DEFAULT now()
 );
 
+-- Showcase projects (admin-curated)
+CREATE TABLE IF NOT EXISTS showcase_projects (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  description text NOT NULL,
+  image_url text,
+  repo_url text,
+  live_url text,
+  tags text[] DEFAULT '{}',
+  author_name text,
+  featured boolean DEFAULT false,
+  display_order integer DEFAULT 0,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
 -- Enable RLS (optional for now)
 ALTER TABLE company_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE interview_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE showcase_projects ENABLE ROW LEVEL SECURITY;

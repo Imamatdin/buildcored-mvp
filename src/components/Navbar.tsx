@@ -18,6 +18,7 @@ const PROBLEMS = [
 
 const NAV_ITEMS = [
   { label: "Problems", href: "/problems", hasDropdown: true },
+  { label: "Showcase", href: "/showcase" },
   { label: "Engineers", href: "/engineers" },
   { label: "Companies", href: "/companies" },
   { label: "About", href: "/about" },

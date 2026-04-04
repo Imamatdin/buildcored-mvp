@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
+config({ path: ".env" });
 
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
