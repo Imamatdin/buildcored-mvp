@@ -17,6 +17,14 @@ CREATE TABLE IF NOT EXISTS interview_requests (
   created_at timestamptz DEFAULT now()
 );
 
+-- Admin configuration (hashed password)
+CREATE TABLE IF NOT EXISTS admin_config (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  password_hash text NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
 -- Showcase projects (admin-curated)
 CREATE TABLE IF NOT EXISTS showcase_projects (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -36,4 +44,5 @@ CREATE TABLE IF NOT EXISTS showcase_projects (
 -- Enable RLS (optional for now)
 ALTER TABLE company_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE interview_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE showcase_projects ENABLE ROW LEVEL SECURITY;

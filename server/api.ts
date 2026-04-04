@@ -1,6 +1,14 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Plugin, ViteDevServer } from 'vite';
 import crypto from 'crypto';
+import {
+  getAdminConfig,
+  setAdminPassword,
+  verifyPassword,
+  createSessionToken,
+  verifySessionToken,
+  validateShowcaseUrls,
+} from '../lib/admin-auth';
 
 const adjectives = ['Latency', 'Resilient', 'Async', 'Distributed', 'Cached', 'Indexed', 'Parallel', 'Atomic', 'Eventual', 'Consistent', 'Sharded', 'Replicated', 'Fault', 'Load', 'Queue', 'Stream', 'Batch', 'Pipeline', 'Circuit', 'Retry'];
 const animals = ['Llama', 'Falcon', 'Otter', 'Badger', 'Raven', 'Panda', 'Wolf', 'Hawk', 'Fox', 'Bear', 'Lynx', 'Crane', 'Viper', 'Shark', 'Eagle', 'Cobra', 'Tiger', 'Bison', 'Moose', 'Whale'];
@@ -224,10 +232,140 @@ export function apiPlugin(): Plugin {
         }
       });
 
-      // Admin: CRUD showcase projects
+      // Admin: Check if password is configured
+      server.middlewares.use('/api/admin/status', async (req, res, next) => {
+        if (req.method !== 'GET') return next();
+        try {
+          const config = await getAdminConfig(getSupabaseClient());
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ configured: !!config }));
+        } catch (e) {
+          console.error(e);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: 'Server error' }));
+        }
+      });
+
+      // Admin: Initial password setup
+      server.middlewares.use('/api/admin/setup', async (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        let body = '';
+        req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
+        req.on('end', async () => {
+          try {
+            const { password } = JSON.parse(body);
+            if (!password || typeof password !== 'string' || password.length < 8) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Password must be at least 8 characters' }));
+              return;
+            }
+            const supabase = getSupabaseClient();
+            const existing = await getAdminConfig(supabase);
+            if (existing) {
+              res.statusCode = 409;
+              res.end(JSON.stringify({ error: 'Admin already configured' }));
+              return;
+            }
+            await setAdminPassword(supabase, password);
+            const token = createSessionToken();
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ token }));
+          } catch (e) {
+            console.error(e);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Server error' }));
+          }
+        });
+      });
+
+      // Admin: Login
+      server.middlewares.use('/api/admin/login', async (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        let body = '';
+        req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
+        req.on('end', async () => {
+          try {
+            const { password } = JSON.parse(body);
+            if (!password) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Password required' }));
+              return;
+            }
+            const config = await getAdminConfig(getSupabaseClient());
+            if (!config) {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: 'Admin not configured' }));
+              return;
+            }
+            const valid = await verifyPassword(password, config.password_hash);
+            if (!valid) {
+              res.statusCode = 401;
+              res.end(JSON.stringify({ error: 'Invalid password' }));
+              return;
+            }
+            const token = createSessionToken();
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ token }));
+          } catch (e) {
+            console.error(e);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Server error' }));
+          }
+        });
+      });
+
+      // Admin: Change password
+      server.middlewares.use('/api/admin/change-password', async (req, res, next) => {
+        if (req.method !== 'POST') return next();
+
+        const authHeader = req.headers.authorization as string | undefined;
+        const authToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+        if (!authToken || !verifySessionToken(authToken)) {
+          res.statusCode = 401;
+          res.end(JSON.stringify({ error: 'Unauthorized' }));
+          return;
+        }
+
+        let body = '';
+        req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
+        req.on('end', async () => {
+          try {
+            const { current_password, new_password } = JSON.parse(body);
+            if (!current_password || !new_password || new_password.length < 8) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Current and new password required (min 8 chars)' }));
+              return;
+            }
+            const supabase = getSupabaseClient();
+            const config = await getAdminConfig(supabase);
+            if (!config) {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: 'Admin not configured' }));
+              return;
+            }
+            const valid = await verifyPassword(current_password, config.password_hash);
+            if (!valid) {
+              res.statusCode = 401;
+              res.end(JSON.stringify({ error: 'Current password is incorrect' }));
+              return;
+            }
+            await setAdminPassword(supabase, new_password);
+            const newToken = createSessionToken();
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ token: newToken, message: 'Password changed successfully' }));
+          } catch (e) {
+            console.error(e);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Server error' }));
+          }
+        });
+      });
+
+      // Admin: CRUD showcase projects (token auth)
       server.middlewares.use('/api/admin/showcase', async (req, res) => {
-        const password = req.headers['x-admin-password'] as string;
-        if (!process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD) {
+        const authHeader = req.headers.authorization as string | undefined;
+        const authToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+        if (!authToken || !verifySessionToken(authToken)) {
           res.statusCode = 401;
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ error: 'Unauthorized' }));
@@ -269,6 +407,13 @@ export function apiPlugin(): Plugin {
                 return;
               }
 
+              const urlError = validateShowcaseUrls(parsed);
+              if (urlError) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: urlError }));
+                return;
+              }
+
               const { data, error } = await supabase
                 .from('showcase_projects')
                 .insert({
@@ -297,6 +442,13 @@ export function apiPlugin(): Plugin {
               if (!id) {
                 res.statusCode = 400;
                 res.end(JSON.stringify({ error: 'ID required' }));
+                return;
+              }
+
+              const urlError = validateShowcaseUrls(updates);
+              if (urlError) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: urlError }));
                 return;
               }
 

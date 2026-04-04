@@ -8,7 +8,14 @@ import {
   Lock,
   X,
   GripVertical,
+  Eye,
+  EyeOff,
+  Settings,
+  ArrowLeft,
+  KeyRound,
 } from "lucide-react";
+
+// --- Types ---
 
 interface Project {
   id: string;
@@ -36,76 +43,220 @@ const EMPTY_FORM = {
   display_order: 0,
 };
 
-function adminFetch(
-  path: string,
-  password: string,
-  opts: RequestInit = {}
-) {
+type View = "login" | "setup" | "dashboard" | "settings";
+
+// --- Auth helpers ---
+
+function getToken(): string | null {
+  return sessionStorage.getItem("admin_token");
+}
+
+function setToken(token: string) {
+  sessionStorage.setItem("admin_token", token);
+}
+
+function clearToken() {
+  sessionStorage.removeItem("admin_token");
+}
+
+function authFetch(path: string, opts: RequestInit = {}) {
+  const token = getToken();
   return fetch(path, {
     ...opts,
     headers: {
       "Content-Type": "application/json",
-      "x-admin-password": password,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(opts.headers || {}),
     },
   });
 }
 
-export default function Admin() {
-  const [password, setPassword] = useState(
-    () => localStorage.getItem("admin_pw") || ""
+// --- Password input with eye toggle ---
+
+function PasswordInput({
+  value,
+  onChange,
+  placeholder,
+  autoFocus,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  autoFocus?: boolean;
+}) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div className="relative">
+      <input
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoFocus={autoFocus}
+        className="w-full px-4 py-3 pr-12 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+      />
+      <button
+        type="button"
+        onClick={() => setVisible(!visible)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition"
+        tabIndex={-1}
+      >
+        {visible ? (
+          <EyeOff className="h-4 w-4" />
+        ) : (
+          <Eye className="h-4 w-4" />
+        )}
+      </button>
+    </div>
   );
-  const [inputPw, setInputPw] = useState("");
-  const [authed, setAuthed] = useState(false);
-  const [authError, setAuthError] = useState("");
+}
+
+// --- Main Component ---
+
+export default function Admin() {
+  const [view, setView] = useState<View>("login");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Login / Setup state
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Dashboard state
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Try to auth with stored password on mount
+  // Settings state
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmNewPw, setConfirmNewPw] = useState("");
+  const [settingsMsg, setSettingsMsg] = useState("");
+  const [settingsError, setSettingsError] = useState("");
+  const [changingPw, setChangingPw] = useState(false);
+
+  // Check status on mount
   useEffect(() => {
-    if (password) tryAuth(password);
+    checkStatus();
   }, []);
 
-  async function tryAuth(pw: string) {
+  async function checkStatus() {
     setLoading(true);
-    setAuthError("");
     try {
-      const res = await adminFetch("/api/admin/showcase", pw);
-      if (res.ok) {
-        const data = await res.json();
-        setProjects(data);
-        setAuthed(true);
-        setPassword(pw);
-        localStorage.setItem("admin_pw", pw);
-      } else {
-        setAuthError("Invalid password");
-        localStorage.removeItem("admin_pw");
+      // First check if we have a valid token
+      const token = getToken();
+      if (token) {
+        const res = await authFetch("/api/admin/showcase");
+        if (res.ok) {
+          const data = await res.json();
+          setProjects(data);
+          setView("dashboard");
+          setLoading(false);
+          return;
+        }
+        // Token expired/invalid
+        clearToken();
       }
+
+      // Check if admin is configured
+      const statusRes = await fetch("/api/admin/status");
+      const { configured } = await statusRes.json();
+      setView(configured ? "login" : "setup");
     } catch {
-      setAuthError("Connection error");
+      setError("Could not connect to server");
     }
     setLoading(false);
   }
 
-  function handleLogin(e: FormEvent) {
+  async function handleLogin(e: FormEvent) {
     e.preventDefault();
-    tryAuth(inputPw);
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      setToken(data.token);
+      setPassword("");
+      await fetchProjects();
+      setView("dashboard");
+    } catch {
+      setError("Connection error");
+    }
+    setLoading(false);
+  }
+
+  async function handleSetup(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Setup failed");
+        setLoading(false);
+        return;
+      }
+
+      setToken(data.token);
+      setPassword("");
+      setConfirmPassword("");
+      await fetchProjects();
+      setView("dashboard");
+    } catch {
+      setError("Connection error");
+    }
+    setLoading(false);
   }
 
   function logout() {
-    setAuthed(false);
+    clearToken();
+    setView("login");
+    setProjects([]);
     setPassword("");
-    setInputPw("");
-    localStorage.removeItem("admin_pw");
   }
 
   async function fetchProjects() {
-    const res = await adminFetch("/api/admin/showcase", password);
-    if (res.ok) setProjects(await res.json());
+    const res = await authFetch("/api/admin/showcase");
+    if (res.ok) {
+      setProjects(await res.json());
+    } else if (res.status === 401) {
+      clearToken();
+      setView("login");
+    }
   }
 
   function openAddForm() {
@@ -150,12 +301,12 @@ export default function Admin() {
     };
 
     if (editingId) {
-      await adminFetch("/api/admin/showcase", password, {
+      await authFetch("/api/admin/showcase", {
         method: "PUT",
         body: JSON.stringify({ id: editingId, ...payload }),
       });
     } else {
-      await adminFetch("/api/admin/showcase", password, {
+      await authFetch("/api/admin/showcase", {
         method: "POST",
         body: JSON.stringify(payload),
       });
@@ -170,14 +321,119 @@ export default function Admin() {
 
   async function handleDelete(id: string) {
     if (!confirm("Delete this project?")) return;
-    await adminFetch(`/api/admin/showcase?id=${id}`, password, {
-      method: "DELETE",
-    });
+    await authFetch(`/api/admin/showcase?id=${id}`, { method: "DELETE" });
     await fetchProjects();
   }
 
-  // Login screen
-  if (!authed) {
+  async function handleChangePassword(e: FormEvent) {
+    e.preventDefault();
+    setSettingsError("");
+    setSettingsMsg("");
+
+    if (newPw.length < 8) {
+      setSettingsError("New password must be at least 8 characters");
+      return;
+    }
+
+    if (newPw !== confirmNewPw) {
+      setSettingsError("New passwords do not match");
+      return;
+    }
+
+    setChangingPw(true);
+    try {
+      const res = await authFetch("/api/admin/change-password", {
+        method: "POST",
+        body: JSON.stringify({
+          current_password: currentPw,
+          new_password: newPw,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSettingsError(data.error || "Failed to change password");
+        setChangingPw(false);
+        return;
+      }
+
+      // Update token with the fresh one
+      setToken(data.token);
+      setCurrentPw("");
+      setNewPw("");
+      setConfirmNewPw("");
+      setSettingsMsg("Password changed successfully");
+    } catch {
+      setSettingsError("Connection error");
+    }
+    setChangingPw(false);
+  }
+
+  // --- Loading screen ---
+  if (loading && view === "login") {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </main>
+    );
+  }
+
+  // --- Setup screen (first time) ---
+  if (view === "setup") {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-6">
+        <form
+          onSubmit={handleSetup}
+          className="w-full max-w-sm bg-card border border-border rounded-lg p-8"
+        >
+          <div className="flex items-center justify-center mb-6">
+            <div className="p-3 rounded-full bg-secondary">
+              <KeyRound className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-xl font-bold text-foreground text-center mb-2">
+            Set Up Admin
+          </h1>
+          <p className="text-sm text-muted-foreground text-center mb-6">
+            Create a password for the admin panel. Choose a strong password — it
+            will be securely hashed.
+          </p>
+
+          <div className="space-y-3 mb-4">
+            <PasswordInput
+              value={password}
+              onChange={setPassword}
+              placeholder="Password (min 8 characters)"
+              autoFocus
+            />
+            <PasswordInput
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              placeholder="Confirm password"
+            />
+          </div>
+
+          {error && (
+            <p className="text-sm text-destructive mb-4 text-center">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition disabled:opacity-50"
+          >
+            {loading ? "Setting up..." : "Create Admin Account"}
+          </button>
+        </form>
+      </main>
+    );
+  }
+
+  // --- Login screen ---
+  if (view === "login") {
     return (
       <main className="min-h-screen flex items-center justify-center px-6">
         <form
@@ -193,21 +449,21 @@ export default function Admin() {
             Admin Panel
           </h1>
           <p className="text-sm text-muted-foreground text-center mb-6">
-            Enter the admin password to continue
+            Enter your admin password to continue
           </p>
 
-          <input
-            type="password"
-            value={inputPw}
-            onChange={(e) => setInputPw(e.target.value)}
-            placeholder="Password"
-            className="w-full px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary mb-4"
-            autoFocus
-          />
+          <div className="mb-4">
+            <PasswordInput
+              value={password}
+              onChange={setPassword}
+              placeholder="Password"
+              autoFocus
+            />
+          </div>
 
-          {authError && (
+          {error && (
             <p className="text-sm text-destructive mb-4 text-center">
-              {authError}
+              {error}
             </p>
           )}
 
@@ -216,14 +472,106 @@ export default function Admin() {
             disabled={loading}
             className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition disabled:opacity-50"
           >
-            {loading ? "Checking..." : "Sign In"}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
       </main>
     );
   }
 
-  // Admin dashboard
+  // --- Settings view ---
+  if (view === "settings") {
+    return (
+      <main className="min-h-screen">
+        <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
+          <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  setView("dashboard");
+                  setSettingsMsg("");
+                  setSettingsError("");
+                }}
+                className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <h1 className="text-lg font-bold text-foreground">Settings</h1>
+            </div>
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        </header>
+
+        <div className="max-w-xl mx-auto px-6 py-8">
+          <div className="bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <KeyRound className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">
+                Change Password
+              </h2>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Current Password
+                </label>
+                <PasswordInput
+                  value={currentPw}
+                  onChange={setCurrentPw}
+                  placeholder="Enter current password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  New Password
+                </label>
+                <PasswordInput
+                  value={newPw}
+                  onChange={setNewPw}
+                  placeholder="New password (min 8 characters)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Confirm New Password
+                </label>
+                <PasswordInput
+                  value={confirmNewPw}
+                  onChange={setConfirmNewPw}
+                  placeholder="Confirm new password"
+                />
+              </div>
+
+              {settingsError && (
+                <p className="text-sm text-destructive">{settingsError}</p>
+              )}
+              {settingsMsg && (
+                <p className="text-sm text-primary">{settingsMsg}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={changingPw}
+                className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition disabled:opacity-50"
+              >
+                {changingPw ? "Changing..." : "Change Password"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // --- Dashboard ---
   return (
     <main className="min-h-screen">
       {/* Header bar */}
@@ -241,8 +589,23 @@ export default function Admin() {
               Add Project
             </button>
             <button
+              onClick={() => {
+                setSettingsMsg("");
+                setSettingsError("");
+                setCurrentPw("");
+                setNewPw("");
+                setConfirmNewPw("");
+                setView("settings");
+              }}
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+            <button
               onClick={logout}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+              title="Logout"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -270,7 +633,7 @@ export default function Admin() {
             <p className="text-sm font-medium text-foreground mt-1">
               {projects.length > 0
                 ? new Date(projects[0].created_at).toLocaleDateString()
-                : "—"}
+                : "\u2014"}
             </p>
           </div>
         </div>
@@ -299,7 +662,6 @@ export default function Admin() {
               </div>
 
               <div className="space-y-4">
-                {/* Title */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Title *
@@ -315,7 +677,6 @@ export default function Admin() {
                   />
                 </div>
 
-                {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Description *
@@ -332,7 +693,6 @@ export default function Admin() {
                   />
                 </div>
 
-                {/* Image URL */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Image URL
@@ -357,7 +717,6 @@ export default function Admin() {
                   )}
                 </div>
 
-                {/* Repo + Live URLs */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
@@ -387,7 +746,6 @@ export default function Admin() {
                   </div>
                 </div>
 
-                {/* Author + Tags */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
@@ -417,7 +775,6 @@ export default function Admin() {
                   </div>
                 </div>
 
-                {/* Order + Featured */}
                 <div className="flex items-center gap-6">
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-foreground mb-1">
@@ -452,7 +809,6 @@ export default function Admin() {
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-border">
                 <button
                   type="button"
@@ -507,7 +863,6 @@ export default function Admin() {
               >
                 <GripVertical className="h-5 w-5 text-muted-foreground/30 shrink-0" />
 
-                {/* Thumbnail */}
                 {project.image_url ? (
                   <img
                     src={project.image_url}
@@ -518,7 +873,6 @@ export default function Admin() {
                   <div className="h-14 w-20 bg-secondary rounded border border-border shrink-0" />
                 )}
 
-                {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-foreground truncate">
@@ -548,7 +902,6 @@ export default function Admin() {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition">
                   <button
                     onClick={() => openEditForm(project)}

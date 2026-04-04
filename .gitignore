@@ -16,3 +16,6 @@ package-lock.json
 .vercel
 .vite/
 .claude/
+bun.lockb
+.git_commits_files.txt
+.git_files_list.txt

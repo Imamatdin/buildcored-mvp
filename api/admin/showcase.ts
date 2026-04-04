@@ -1,9 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
+import {
+  createSupabaseClient,
+  verifySessionToken,
+  validateShowcaseUrls,
+} from '../../lib/admin-auth';
 
 function checkAuth(req: VercelRequest): boolean {
-  const password = req.headers['x-admin-password'] as string;
-  return !!process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD;
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  return !!token && verifySessionToken(token);
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -11,10 +16,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const supabase = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = createSupabaseClient();
 
   try {
     if (req.method === 'GET') {
@@ -34,6 +36,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!title || !description) {
         return res.status(400).json({ error: 'Title and description are required' });
       }
+
+      const urlError = validateShowcaseUrls(req.body);
+      if (urlError) return res.status(400).json({ error: urlError });
 
       const { data, error } = await supabase
         .from('showcase_projects')
@@ -58,6 +63,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'PUT') {
       const { id, ...updates } = req.body;
       if (!id) return res.status(400).json({ error: 'ID required' });
+
+      const urlError = validateShowcaseUrls(updates);
+      if (urlError) return res.status(400).json({ error: urlError });
 
       const { data, error } = await supabase
         .from('showcase_projects')
