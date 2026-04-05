@@ -16,7 +16,7 @@ const Index = () => {
       <section className="h-screen snap-start flex flex-col relative shrink-0">
         {/* Logo at top - absolute so it doesn't affect text centering */}
         <div className="absolute top-8 left-0 right-0 px-6 flex justify-center">
-          <img src="/logo.svg" alt="Buildcored" className="h-64 md:h-72 w-auto" />
+          <img src="/logo.svg" alt="Buildcored" className="h-16 md:h-20 w-auto" />
         </div>
 
         {/* Center Text - vertically centered */}
@@ -64,7 +64,7 @@ const Index = () => {
           {/* Value Props */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
             <div className="bg-card border border-border rounded-lg p-6">
-              <div className="p-3 rounded-lg bg-secondary text-primary w-fit mb-4">
+              <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
                 <Eye className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -77,7 +77,7 @@ const Index = () => {
             </div>
 
             <div className="bg-card border border-border rounded-lg p-6">
-              <div className="p-3 rounded-lg bg-secondary text-primary w-fit mb-4">
+              <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
                 <Zap className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -90,7 +90,7 @@ const Index = () => {
             </div>
 
             <div className="bg-card border border-border rounded-lg p-6">
-              <div className="p-3 rounded-lg bg-secondary text-primary w-fit mb-4">
+              <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
                 <Trophy className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -103,7 +103,7 @@ const Index = () => {
             </div>
 
             <div className="bg-card border border-border rounded-lg p-6">
-              <div className="p-3 rounded-lg bg-secondary text-primary w-fit mb-4">
+              <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
                 <Shield className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -149,41 +149,16 @@ const Index = () => {
             </div>
             <Link
               to="/problems"
-              className="text-primary hover:underline text-sm inline-flex items-center gap-1"
+              className="text-white/60 hover:text-white hover:underline text-sm inline-flex items-center gap-1"
             >
               View all problems
               <ArrowRight className="h-3 w-3" />
             </Link>
           </section>
 
-          {/* Email Signup Footer */}
-          <section className="mt-16 text-center">
-            <p className="text-muted-foreground text-sm mb-4">
-              Ready for more updates?
-            </p>
-            <form
-              action="https://buttondown.com/api/emails/embed-subscribe/buildcored"
-              method="post"
-              target="popupwindow"
-              className="mx-auto flex max-w-sm items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md"
-            >
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="your@email.com"
-                className="flex-1 bg-transparent px-3 text-sm text-white placeholder:text-white/40 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-full px-4 py-1.5 text-sm font-medium text-black bg-white hover:bg-white/90 transition"
-              >
-                Subscribe
-              </button>
-            </form>
-          </section>
         </div>
       </section>
+
     </main>
   );
 };

@@ -94,7 +94,7 @@ function PasswordInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoFocus={autoFocus}
-        className="w-full px-4 py-3 pr-12 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-full px-4 py-3 pr-12 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
       />
       <button
         type="button"
@@ -389,7 +389,7 @@ export default function Admin() {
         >
           <div className="flex items-center justify-center mb-6">
             <div className="p-3 rounded-full bg-secondary">
-              <KeyRound className="h-6 w-6 text-primary" />
+              <KeyRound className="h-6 w-6 text-white/70" />
             </div>
           </div>
           <h1 className="text-xl font-bold text-foreground text-center mb-2">
@@ -423,7 +423,7 @@ export default function Admin() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition disabled:opacity-50"
+            className="w-full py-3 rounded-lg bg-white text-black font-medium hover:bg-white/90 transition disabled:opacity-50"
           >
             {loading ? "Setting up..." : "Create Admin Account"}
           </button>
@@ -442,7 +442,7 @@ export default function Admin() {
         >
           <div className="flex items-center justify-center mb-6">
             <div className="p-3 rounded-full bg-secondary">
-              <Lock className="h-6 w-6 text-primary" />
+              <Lock className="h-6 w-6 text-white/70" />
             </div>
           </div>
           <h1 className="text-xl font-bold text-foreground text-center mb-2">
@@ -470,7 +470,7 @@ export default function Admin() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition disabled:opacity-50"
+            className="w-full py-3 rounded-lg bg-white text-black font-medium hover:bg-white/90 transition disabled:opacity-50"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
@@ -510,7 +510,7 @@ export default function Admin() {
         <div className="max-w-xl mx-auto px-6 py-8">
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
-              <KeyRound className="h-5 w-5 text-primary" />
+              <KeyRound className="h-5 w-5 text-white/70" />
               <h2 className="text-lg font-semibold text-foreground">
                 Change Password
               </h2>
@@ -554,13 +554,13 @@ export default function Admin() {
                 <p className="text-sm text-destructive">{settingsError}</p>
               )}
               {settingsMsg && (
-                <p className="text-sm text-primary">{settingsMsg}</p>
+                <p className="text-sm text-white/70">{settingsMsg}</p>
               )}
 
               <button
                 type="submit"
                 disabled={changingPw}
-                className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition disabled:opacity-50"
+                className="w-full py-3 rounded-lg bg-white text-black font-medium hover:bg-white/90 transition disabled:opacity-50"
               >
                 {changingPw ? "Changing..." : "Change Password"}
               </button>
@@ -578,12 +578,12 @@ export default function Admin() {
       <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-lg font-bold text-foreground">
-            <span className="text-primary">Showcase</span> Admin
+            <span className="text-white/70">Showcase</span> Admin
           </h1>
           <div className="flex items-center gap-3">
             <button
               onClick={openAddForm}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-black text-sm font-medium hover:bg-white/90 transition"
             >
               <Plus className="h-4 w-4" />
               Add Project
@@ -624,7 +624,7 @@ export default function Admin() {
           </div>
           <div className="bg-card border border-border rounded-lg p-4">
             <p className="text-sm text-muted-foreground">Featured</p>
-            <p className="text-2xl font-bold text-primary">
+            <p className="text-2xl font-bold text-white/70">
               {projects.filter((p) => p.featured).length}
             </p>
           </div>
@@ -672,7 +672,7 @@ export default function Admin() {
                     onChange={(e) =>
                       setForm({ ...form, title: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
                     placeholder="My Awesome Project"
                   />
                 </div>
@@ -688,7 +688,7 @@ export default function Admin() {
                     onChange={(e) =>
                       setForm({ ...form, description: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                    className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30 resize-none"
                     placeholder="A brief description of the project..."
                   />
                 </div>
@@ -702,7 +702,7 @@ export default function Admin() {
                     onChange={(e) =>
                       setForm({ ...form, image_url: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
                     placeholder="https://example.com/screenshot.png"
                   />
                   {form.image_url && (
@@ -727,7 +727,7 @@ export default function Admin() {
                       onChange={(e) =>
                         setForm({ ...form, repo_url: e.target.value })
                       }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
                       placeholder="https://github.com/..."
                     />
                   </div>
@@ -740,7 +740,7 @@ export default function Admin() {
                       onChange={(e) =>
                         setForm({ ...form, live_url: e.target.value })
                       }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
                       placeholder="https://myproject.com"
                     />
                   </div>
@@ -756,7 +756,7 @@ export default function Admin() {
                       onChange={(e) =>
                         setForm({ ...form, author_name: e.target.value })
                       }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
                       placeholder="Jane Doe"
                     />
                   </div>
@@ -769,7 +769,7 @@ export default function Admin() {
                       onChange={(e) =>
                         setForm({ ...form, tags: e.target.value })
                       }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
                       placeholder="React, TypeScript, AI"
                     />
                   </div>
@@ -789,7 +789,7 @@ export default function Admin() {
                           display_order: parseInt(e.target.value) || 0,
                         })
                       }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
                     />
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer pt-5">
@@ -799,10 +799,10 @@ export default function Admin() {
                       onChange={(e) =>
                         setForm({ ...form, featured: e.target.checked })
                       }
-                      className="h-4 w-4 rounded border-border accent-primary"
+                      className="h-4 w-4 rounded border-border accent-white"
                     />
                     <span className="text-sm text-foreground flex items-center gap-1">
-                      <Star className="h-3 w-3 text-primary" />
+                      <Star className="h-3 w-3 text-white/70" />
                       Featured
                     </span>
                   </label>
@@ -823,7 +823,7 @@ export default function Admin() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition disabled:opacity-50"
+                  className="px-6 py-2 rounded-lg bg-white text-black text-sm font-medium hover:bg-white/90 transition disabled:opacity-50"
                 >
                   {saving
                     ? "Saving..."
@@ -848,7 +848,7 @@ export default function Admin() {
             </p>
             <button
               onClick={openAddForm}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-black text-sm font-medium hover:bg-white/90 transition"
             >
               <Plus className="h-4 w-4" />
               Add Project
@@ -859,7 +859,7 @@ export default function Admin() {
             {projects.map((project) => (
               <div
                 key={project.id}
-                className="bg-card border border-border rounded-lg p-4 flex items-center gap-4 group hover:border-primary/30 transition"
+                className="bg-card border border-border rounded-lg p-4 flex items-center gap-4 group hover:border-white/20 transition"
               >
                 <GripVertical className="h-5 w-5 text-muted-foreground/30 shrink-0" />
 
@@ -879,7 +879,7 @@ export default function Admin() {
                       {project.title}
                     </h3>
                     {project.featured && (
-                      <Star className="h-3.5 w-3.5 text-primary fill-primary shrink-0" />
+                      <Star className="h-3.5 w-3.5 text-white/70 fill-white/70 shrink-0" />
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground truncate">

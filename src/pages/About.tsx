@@ -52,7 +52,7 @@ export default function About() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-card border border-border rounded-lg p-6">
-                <div className="p-3 rounded-lg bg-secondary text-primary w-fit mb-4">
+                <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
                   <Lightbulb className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -65,7 +65,7 @@ export default function About() {
               </div>
 
               <div className="bg-card border border-border rounded-lg p-6">
-                <div className="p-3 rounded-lg bg-secondary text-primary w-fit mb-4">
+                <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
                   <Users className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -78,7 +78,7 @@ export default function About() {
               </div>
 
               <div className="bg-card border border-border rounded-lg p-6">
-                <div className="p-3 rounded-lg bg-secondary text-primary w-fit mb-4">
+                <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
                   <Code className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -91,7 +91,7 @@ export default function About() {
               </div>
 
               <div className="bg-card border border-border rounded-lg p-6">
-                <div className="p-3 rounded-lg bg-secondary text-primary w-fit mb-4">
+                <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
                   <Sparkles className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -138,10 +138,10 @@ export default function About() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                to="/team"
+                to="/companies"
                 className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-foreground border border-border hover:bg-secondary transition"
               >
-                Meet the Team
+                For Companies
               </Link>
             </div>
           </section>

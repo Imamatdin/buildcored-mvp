@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { ExternalLink, Github, Star } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import { ExternalLink, GithubIcon, Star } from "lucide-react";
 
 interface Project {
   id: string;
@@ -29,35 +28,33 @@ export default function Showcase() {
   }, []);
 
   return (
-    <main className="min-h-screen overflow-y-auto">
-      <Navbar />
-
-      <section className="min-h-screen pt-28">
-        <div className="max-w-6xl mx-auto px-6 py-12">
+    <main className="min-h-screen">
+      <section className="pt-24 pb-16">
+        <div className="max-w-5xl mx-auto px-6">
           {/* Header */}
-          <header className="mb-16 text-center">
-            <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
-              Project <span className="text-primary">Showcase</span>
+          <header className="mb-14 text-center">
+            <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
+              Project Showcase
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              The best open source projects built by our community. Curated
-              picks that demonstrate creative engineering at its finest.
+            <p className="text-base text-muted-foreground max-w-xl mx-auto">
+              Curated picks from our community. Creative engineering at its
+              finest.
             </p>
           </header>
 
           {/* Loading */}
           {loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
                   className="bg-card border border-border rounded-lg overflow-hidden animate-pulse"
                 >
-                  <div className="h-48 bg-secondary" />
-                  <div className="p-6 space-y-3">
-                    <div className="h-5 bg-secondary rounded w-3/4" />
-                    <div className="h-4 bg-secondary rounded w-full" />
-                    <div className="h-4 bg-secondary rounded w-2/3" />
+                  <div className="h-44 bg-white/[0.03]" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-4 bg-white/[0.06] rounded w-3/4" />
+                    <div className="h-3 bg-white/[0.04] rounded w-full" />
+                    <div className="h-3 bg-white/[0.04] rounded w-2/3" />
                   </div>
                 </div>
               ))}
@@ -66,12 +63,12 @@ export default function Showcase() {
 
           {/* Empty state */}
           {!loading && projects.length === 0 && (
-            <div className="text-center py-20">
-              <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-foreground mb-2">
+            <div className="text-center py-24">
+              <Star className="h-10 w-10 text-white/20 mx-auto mb-4" />
+              <h2 className="text-lg font-semibold text-foreground mb-2">
                 Coming Soon
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 We're curating the best projects. Check back soon.
               </p>
             </div>
@@ -79,51 +76,51 @@ export default function Showcase() {
 
           {/* Project Grid */}
           {!loading && projects.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {projects.map((project) => (
                 <article
                   key={project.id}
-                  className={`group bg-card border rounded-lg overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/5 ${
+                  className={`group bg-card border rounded-lg overflow-hidden transition-all hover:border-white/20 ${
                     project.featured
-                      ? "border-primary/50 ring-1 ring-primary/20"
-                      : "border-border hover:border-primary/30"
+                      ? "border-white/20"
+                      : "border-border"
                   }`}
                 >
                   {/* Image */}
                   {project.image_url && (
-                    <div className="h-48 overflow-hidden bg-secondary">
+                    <div className="h-44 overflow-hidden bg-white/[0.02]">
                       <img
                         src={project.image_url}
                         alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                       />
                     </div>
                   )}
 
-                  <div className="p-6">
+                  <div className="p-5">
                     {/* Featured badge */}
                     {project.featured && (
-                      <div className="flex items-center gap-1 text-primary text-xs font-medium mb-3">
-                        <Star className="h-3 w-3 fill-current" />
+                      <div className="flex items-center gap-1 text-white/60 text-xs font-medium mb-2.5">
+                        <Star className="h-3 w-3" />
                         Featured
                       </div>
                     )}
 
                     {/* Title */}
-                    <h2 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    <h2 className="text-base font-semibold text-foreground mb-1.5">
                       {project.title}
                     </h2>
 
                     {/* Description */}
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                       {project.description}
                     </p>
 
                     {/* Author */}
                     {project.author_name && (
-                      <p className="text-xs text-muted-foreground mb-4">
+                      <p className="text-xs text-muted-foreground mb-3">
                         by{" "}
-                        <span className="text-foreground">
+                        <span className="text-white/70">
                           {project.author_name}
                         </span>
                       </p>
@@ -131,11 +128,11 @@ export default function Showcase() {
 
                     {/* Tags */}
                     {project.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <div className="flex flex-wrap gap-1.5 mb-4">
                         {project.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="px-2 py-0.5 rounded-full bg-secondary text-xs text-muted-foreground"
+                            className="px-2 py-0.5 rounded-full bg-white/[0.06] text-xs text-white/50"
                           >
                             {tag}
                           </span>
@@ -144,15 +141,15 @@ export default function Showcase() {
                     )}
 
                     {/* Links */}
-                    <div className="flex items-center gap-3 pt-2 border-t border-border">
+                    <div className="flex items-center gap-3 pt-3 border-t border-white/[0.06]">
                       {project.repo_url && (
                         <a
                           href={project.repo_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition"
+                          className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/80 transition"
                         >
-                          <Github className="h-4 w-4" />
+                          <GithubIcon className="h-3.5 w-3.5" />
                           Repo
                         </a>
                       )}
@@ -161,10 +158,10 @@ export default function Showcase() {
                           href={project.live_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition"
+                          className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/80 transition"
                         >
-                          <ExternalLink className="h-4 w-4" />
-                          Live Demo
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Live
                         </a>
                       )}
                     </div>

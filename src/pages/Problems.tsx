@@ -37,18 +37,18 @@ export default function Problems() {
               <Link
                 key={problem.id}
                 to={`/problem/${problem.id}`}
-                className="group bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+                className="group bg-card border border-border rounded-lg p-6 hover:border-white/20 transition-all hover:shadow-lg hover:shadow-white/5"
               >
                 <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-lg bg-secondary text-primary">
+                  <div className="p-3 rounded-lg bg-secondary text-white/60">
                     {ICONS[problem.id]}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-mono text-primary">
+                      <span className="text-xs font-mono text-white/60">
                         #{problem.id}
                       </span>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-white/60 group-hover:translate-x-1 transition-all" />
                     </div>
                     <h2 className="text-lg font-semibold text-foreground mb-2">
                       {problem.track}
@@ -69,21 +69,21 @@ export default function Problems() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
               <div>
-                <div className="text-3xl font-bold text-primary mb-2">1</div>
+                <div className="text-3xl font-bold text-white/60 mb-2">1</div>
                 <h3 className="font-medium text-foreground mb-1">Choose a Problem</h3>
                 <p className="text-sm text-muted-foreground">
                   Pick the scenario that matches your expertise
                 </p>
               </div>
               <div>
-                <div className="text-3xl font-bold text-primary mb-2">2</div>
+                <div className="text-3xl font-bold text-white/60 mb-2">2</div>
                 <h3 className="font-medium text-foreground mb-1">Share Your Thinking</h3>
                 <p className="text-sm text-muted-foreground">
                   Explain how you'd approach the problem (15-25 min)
                 </p>
               </div>
               <div>
-                <div className="text-3xl font-bold text-primary mb-2">3</div>
+                <div className="text-3xl font-bold text-white/60 mb-2">3</div>
                 <h3 className="font-medium text-foreground mb-1">Get Discovered</h3>
                 <p className="text-sm text-muted-foreground">
                   Companies see your reasoning, not your resume

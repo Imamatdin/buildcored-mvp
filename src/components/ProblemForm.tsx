@@ -105,7 +105,7 @@ export default function ProblemForm({ problem }: ProblemFormProps) {
           <div className="max-w-xl text-center space-y-6">
             <h1 className="text-3xl font-semibold text-foreground">
               Submitted as{" "}
-              <span className="text-primary">{handle}</span>
+              <span className="text-white/80">{handle}</span>
             </h1>
             <p className="text-lg text-muted-foreground">
               Companies see your reasoning anonymously.

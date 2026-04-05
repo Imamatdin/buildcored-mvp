@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Companies from "./pages/Companies";
 import CompanyView from "./pages/CompanyView";
@@ -22,14 +23,22 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Landing page — no navbar/footer */}
           <Route path="/" element={<Index />} />
-          <Route path="/companies" element={<Companies />} />
-          <Route path="/company/:token" element={<CompanyView />} />
-          <Route path="/problems" element={<Problems />} />
-          <Route path="/problem/:id" element={<Problem />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/showcase" element={<Showcase />} />
+
+          {/* Admin — no navbar/footer */}
           <Route path="/admin" element={<Admin />} />
+
+          {/* All other pages get navbar + footer */}
+          <Route element={<Layout />}>
+            <Route path="/companies" element={<Companies />} />
+            <Route path="/company/:token" element={<CompanyView />} />
+            <Route path="/problems" element={<Problems />} />
+            <Route path="/problem/:id" element={<Problem />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/showcase" element={<Showcase />} />
+          </Route>
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
