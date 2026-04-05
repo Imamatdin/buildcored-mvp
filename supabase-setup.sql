@@ -17,6 +17,33 @@ CREATE TABLE IF NOT EXISTS interview_requests (
   created_at timestamptz DEFAULT now()
 );
 
+-- Decision logs (engineer submissions)
+CREATE TABLE IF NOT EXISTS decision_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL,
+  handle text NOT NULL,
+  visibility text NOT NULL DEFAULT 'unlisted',
+  role_track text,
+  seniority text,
+  time_budget text,
+  problem_id integer NOT NULL,
+  problem_title text,
+  first_action text NOT NULL,
+  why_first text NOT NULL,
+  second_action text NOT NULL,
+  why_second text NOT NULL,
+  third_action text NOT NULL,
+  signals_data_first text NOT NULL,
+  wont_do text NOT NULL,
+  biggest_risk text NOT NULL,
+  verify_and_rollback text NOT NULL,
+  with_more_time text NOT NULL,
+  attest_original boolean NOT NULL,
+  status text NOT NULL DEFAULT 'submitted',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
 -- Admin configuration (hashed password)
 CREATE TABLE IF NOT EXISTS admin_config (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -44,5 +71,6 @@ CREATE TABLE IF NOT EXISTS showcase_projects (
 -- Enable RLS (optional for now)
 ALTER TABLE company_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE interview_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE decision_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE showcase_projects ENABLE ROW LEVEL SECURITY;
