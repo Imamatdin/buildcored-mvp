@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   createSupabaseClient,
-  getAdminConfig,
+  authenticateRequest,
+  getAdminByEmail,
   verifyPassword,
-  setAdminPassword,
-  verifySessionToken,
-  createSessionToken,
+  updateAdminPassword,
+  createJwt,
 } from '../../lib/admin-auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -13,14 +13,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Verify session token
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  if (!token || !verifySessionToken(token)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   try {
+    const supabase = createSupabaseClient();
+    const auth = await authenticateRequest(req.headers.authorization, supabase);
+    if (!auth) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const { current_password, new_password } = req.body;
 
     if (!current_password || !new_password) {
@@ -31,22 +30,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'New password must be at least 8 characters' });
     }
 
-    const supabase = createSupabaseClient();
-    const config = await getAdminConfig(supabase);
-
-    if (!config) {
-      return res.status(404).json({ error: 'Admin not configured' });
+    const admin = await getAdminByEmail(supabase, auth.email);
+    if (!admin) {
+      return res.status(401).json({ error: 'Admin not found' });
     }
 
-    const valid = await verifyPassword(current_password, config.password_hash);
+    const valid = await verifyPassword(current_password, admin.password_hash);
     if (!valid) {
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
 
-    await setAdminPassword(supabase, new_password);
-
-    // Issue a fresh token after password change
-    const newToken = createSessionToken();
+    await updateAdminPassword(supabase, auth.email, new_password);
+    const newToken = createJwt(auth.email);
     return res.json({ token: newToken, message: 'Password changed successfully' });
   } catch (e: any) {
     console.error('Change password error:', e);

@@ -44,7 +44,16 @@ CREATE TABLE IF NOT EXISTS decision_logs (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Admin configuration (hashed password)
+-- Admin users (email + bcrypt password)
+CREATE TABLE IF NOT EXISTS admins (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text UNIQUE NOT NULL,
+  password_hash text NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- Legacy admin_config (kept for backwards compat, no longer used)
 CREATE TABLE IF NOT EXISTS admin_config (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   password_hash text NOT NULL,
@@ -72,5 +81,6 @@ CREATE TABLE IF NOT EXISTS showcase_projects (
 ALTER TABLE company_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE interview_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE decision_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE showcase_projects ENABLE ROW LEVEL SECURITY;

@@ -1,24 +1,18 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   createSupabaseClient,
-  verifySessionToken,
+  authenticateRequest,
   validateShowcaseUrls,
 } from '../../lib/admin-auth';
 
-function checkAuth(req: VercelRequest): boolean {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  return !!token && verifySessionToken(token);
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!checkAuth(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const supabase = createSupabaseClient();
-
   try {
+    const supabase = createSupabaseClient();
+    const auth = await authenticateRequest(req.headers.authorization, supabase);
+    if (!auth) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('showcase_projects')

@@ -2,11 +2,13 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Plugin, ViteDevServer } from 'vite';
 import crypto from 'crypto';
 import {
-  getAdminConfig,
-  setAdminPassword,
+  getAdminByEmail,
+  getAnyAdmin,
+  createAdmin,
+  updateAdminPassword,
   verifyPassword,
-  createSessionToken,
-  verifySessionToken,
+  createJwt,
+  authenticateRequest,
   validateShowcaseUrls,
 } from '../lib/admin-auth';
 
@@ -135,7 +137,7 @@ export function apiPlugin(): Plugin {
         });
       });
 
-      // Register Company (Mock for local dev)
+      // Register Company
       server.middlewares.use('/api/register-company', async (req, res, next) => {
         if (req.method !== 'POST') return next();
 
@@ -167,7 +169,7 @@ export function apiPlugin(): Plugin {
         });
       });
 
-      // Company View (Mock for local dev)
+      // Company View
       server.middlewares.use('/api/company-view', async (req, res, next) => {
         if (req.method !== 'POST') return next();
 
@@ -232,13 +234,29 @@ export function apiPlugin(): Plugin {
         }
       });
 
-      // Admin: Check if password is configured
+      // Admin: Status — check auth or check if configured
       server.middlewares.use('/api/admin/status', async (req, res, next) => {
         if (req.method !== 'GET') return next();
         try {
-          const config = await getAdminConfig(getSupabaseClient());
+          const supabase = getSupabaseClient();
+          const authHeader = req.headers.authorization as string | undefined;
+
+          if (authHeader) {
+            const admin = await authenticateRequest(authHeader, supabase);
+            if (!admin) {
+              res.statusCode = 401;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ ok: false }));
+              return;
+            }
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ ok: true, email: admin.email }));
+            return;
+          }
+
+          const existing = await getAnyAdmin(supabase);
           res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ configured: !!config }));
+          res.end(JSON.stringify({ configured: !!existing }));
         } catch (e) {
           console.error(e);
           res.statusCode = 500;
@@ -246,28 +264,34 @@ export function apiPlugin(): Plugin {
         }
       });
 
-      // Admin: Initial password setup
+      // Admin: Initial setup (email + password)
       server.middlewares.use('/api/admin/setup', async (req, res, next) => {
         if (req.method !== 'POST') return next();
         let body = '';
         req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
         req.on('end', async () => {
           try {
-            const { password } = JSON.parse(body);
+            const { email, password } = JSON.parse(body);
+            if (!email || typeof email !== 'string') {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: 'Email required' }));
+              return;
+            }
             if (!password || typeof password !== 'string' || password.length < 8) {
               res.statusCode = 400;
               res.end(JSON.stringify({ error: 'Password must be at least 8 characters' }));
               return;
             }
             const supabase = getSupabaseClient();
-            const existing = await getAdminConfig(supabase);
+            const existing = await getAnyAdmin(supabase);
             if (existing) {
               res.statusCode = 409;
               res.end(JSON.stringify({ error: 'Admin already configured' }));
               return;
             }
-            await setAdminPassword(supabase, password);
-            const token = createSessionToken();
+            const normalizedEmail = email.toLowerCase().trim();
+            await createAdmin(supabase, normalizedEmail, password);
+            const token = createJwt(normalizedEmail);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ token }));
           } catch (e) {
@@ -278,32 +302,33 @@ export function apiPlugin(): Plugin {
         });
       });
 
-      // Admin: Login
+      // Admin: Login (email + password)
       server.middlewares.use('/api/admin/login', async (req, res, next) => {
         if (req.method !== 'POST') return next();
         let body = '';
         req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
         req.on('end', async () => {
           try {
-            const { password } = JSON.parse(body);
-            if (!password) {
+            const { email, password } = JSON.parse(body);
+            if (!email || !password) {
               res.statusCode = 400;
-              res.end(JSON.stringify({ error: 'Password required' }));
+              res.end(JSON.stringify({ error: 'Email and password required' }));
               return;
             }
-            const config = await getAdminConfig(getSupabaseClient());
-            if (!config) {
-              res.statusCode = 404;
-              res.end(JSON.stringify({ error: 'Admin not configured' }));
+            const supabase = getSupabaseClient();
+            const admin = await getAdminByEmail(supabase, email.toLowerCase().trim());
+            if (!admin) {
+              res.statusCode = 401;
+              res.end(JSON.stringify({ error: 'Invalid email or password' }));
               return;
             }
-            const valid = await verifyPassword(password, config.password_hash);
+            const valid = await verifyPassword(password, admin.password_hash);
             if (!valid) {
               res.statusCode = 401;
-              res.end(JSON.stringify({ error: 'Invalid password' }));
+              res.end(JSON.stringify({ error: 'Invalid email or password' }));
               return;
             }
-            const token = createSessionToken();
+            const token = createJwt(admin.email);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ token }));
           } catch (e) {
@@ -314,13 +339,14 @@ export function apiPlugin(): Plugin {
         });
       });
 
-      // Admin: Change password
+      // Admin: Change password (JWT-protected)
       server.middlewares.use('/api/admin/change-password', async (req, res, next) => {
         if (req.method !== 'POST') return next();
 
+        const supabase = getSupabaseClient();
         const authHeader = req.headers.authorization as string | undefined;
-        const authToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-        if (!authToken || !verifySessionToken(authToken)) {
+        const auth = await authenticateRequest(authHeader, supabase);
+        if (!auth) {
           res.statusCode = 401;
           res.end(JSON.stringify({ error: 'Unauthorized' }));
           return;
@@ -336,21 +362,20 @@ export function apiPlugin(): Plugin {
               res.end(JSON.stringify({ error: 'Current and new password required (min 8 chars)' }));
               return;
             }
-            const supabase = getSupabaseClient();
-            const config = await getAdminConfig(supabase);
-            if (!config) {
-              res.statusCode = 404;
-              res.end(JSON.stringify({ error: 'Admin not configured' }));
+            const admin = await getAdminByEmail(supabase, auth.email);
+            if (!admin) {
+              res.statusCode = 401;
+              res.end(JSON.stringify({ error: 'Admin not found' }));
               return;
             }
-            const valid = await verifyPassword(current_password, config.password_hash);
+            const valid = await verifyPassword(current_password, admin.password_hash);
             if (!valid) {
               res.statusCode = 401;
               res.end(JSON.stringify({ error: 'Current password is incorrect' }));
               return;
             }
-            await setAdminPassword(supabase, new_password);
-            const newToken = createSessionToken();
+            await updateAdminPassword(supabase, auth.email, new_password);
+            const newToken = createJwt(auth.email);
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ token: newToken, message: 'Password changed successfully' }));
           } catch (e) {
@@ -361,18 +386,17 @@ export function apiPlugin(): Plugin {
         });
       });
 
-      // Admin: CRUD showcase projects (token auth)
+      // Admin: CRUD showcase projects (JWT-protected)
       server.middlewares.use('/api/admin/showcase', async (req, res) => {
+        const supabase = getSupabaseClient();
         const authHeader = req.headers.authorization as string | undefined;
-        const authToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-        if (!authToken || !verifySessionToken(authToken)) {
+        const auth = await authenticateRequest(authHeader, supabase);
+        if (!auth) {
           res.statusCode = 401;
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ error: 'Unauthorized' }));
           return;
         }
-
-        const supabase = getSupabaseClient();
 
         if (req.method === 'GET') {
           try {
@@ -495,7 +519,7 @@ export function apiPlugin(): Plugin {
         });
       });
 
-      // Request Interview (Mock for local dev)
+      // Request Interview
       server.middlewares.use('/api/request-interview', async (req, res, next) => {
         if (req.method !== 'POST') return next();
 
@@ -551,4 +575,3 @@ export function apiPlugin(): Plugin {
     },
   };
 }
-

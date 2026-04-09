@@ -120,6 +120,7 @@ export default function Admin() {
   const [error, setError] = useState("");
 
   // Login / Setup state
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -146,16 +147,18 @@ export default function Admin() {
   async function checkStatus() {
     setLoading(true);
     try {
-      // First check if we have a valid token
+      // First check if we have a valid token via /api/admin/status
       const token = getToken();
       if (token) {
-        const res = await authFetch("/api/admin/showcase");
+        const res = await authFetch("/api/admin/status");
         if (res.ok) {
           const data = await res.json();
-          setProjects(data);
-          setView("dashboard");
-          setLoading(false);
-          return;
+          if (data.ok) {
+            await fetchProjects();
+            setView("dashboard");
+            setLoading(false);
+            return;
+          }
         }
         // Token expired/invalid
         clearToken();
@@ -180,7 +183,7 @@ export default function Admin() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -192,6 +195,7 @@ export default function Admin() {
       }
 
       setToken(data.token);
+      setEmail("");
       setPassword("");
       await fetchProjects();
       setView("dashboard");
@@ -204,6 +208,11 @@ export default function Admin() {
   async function handleSetup(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (!email) {
+      setError("Email required");
+      return;
+    }
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
@@ -220,7 +229,7 @@ export default function Admin() {
       const res = await fetch("/api/admin/setup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -232,6 +241,7 @@ export default function Admin() {
       }
 
       setToken(data.token);
+      setEmail("");
       setPassword("");
       setConfirmPassword("");
       await fetchProjects();
@@ -246,6 +256,7 @@ export default function Admin() {
     clearToken();
     setView("login");
     setProjects([]);
+    setEmail("");
     setPassword("");
   }
 
@@ -396,16 +407,23 @@ export default function Admin() {
             Set Up Admin
           </h1>
           <p className="text-sm text-muted-foreground text-center mb-6">
-            Create a password for the admin panel. Choose a strong password — it
-            will be securely hashed.
+            Create an admin account. Your password will be securely hashed.
           </p>
 
           <div className="space-y-3 mb-4">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Admin email"
+              autoFocus
+              required
+              className="w-full px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
+            />
             <PasswordInput
               value={password}
               onChange={setPassword}
               placeholder="Password (min 8 characters)"
-              autoFocus
             />
             <PasswordInput
               value={confirmPassword}
@@ -449,15 +467,23 @@ export default function Admin() {
             Admin Panel
           </h1>
           <p className="text-sm text-muted-foreground text-center mb-6">
-            Enter your admin password to continue
+            Sign in with your admin credentials
           </p>
 
-          <div className="mb-4">
+          <div className="space-y-3 mb-4">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              autoFocus
+              required
+              className="w-full px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
+            />
             <PasswordInput
               value={password}
               onChange={setPassword}
               placeholder="Password"
-              autoFocus
             />
           </div>
 

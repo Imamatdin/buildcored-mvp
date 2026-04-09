@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   createSupabaseClient,
-  getAdminConfig,
+  getAdminByEmail,
   verifyPassword,
-  createSessionToken,
+  createJwt,
 } from '../../lib/admin-auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -12,24 +12,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { password } = req.body;
+    const { email, password } = req.body;
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'Email required' });
+    }
     if (!password || typeof password !== 'string') {
       return res.status(400).json({ error: 'Password required' });
     }
 
     const supabase = createSupabaseClient();
-    const config = await getAdminConfig(supabase);
+    const admin = await getAdminByEmail(supabase, email.toLowerCase().trim());
 
-    if (!config) {
-      return res.status(404).json({ error: 'Admin not configured. Please set up a password first.' });
+    if (!admin) {
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const valid = await verifyPassword(password, config.password_hash);
+    const valid = await verifyPassword(password, admin.password_hash);
     if (!valid) {
-      return res.status(401).json({ error: 'Invalid password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = createSessionToken();
+    const token = createJwt(admin.email);
     return res.json({ token });
   } catch (e: any) {
     console.error('Login error:', e);

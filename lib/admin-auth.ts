@@ -1,14 +1,14 @@
-import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const BCRYPT_ROUNDS = 12;
-const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+const JWT_EXPIRY = '24h';
 
-function getTokenSecret(): string {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY not set');
-  return key;
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET not set');
+  return secret;
 }
 
 export function createSupabaseClient(): SupabaseClient {
@@ -28,74 +28,81 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-// --- Session tokens (HMAC-based, no DB lookup needed) ---
+// --- JWT sessions ---
 
-export function createSessionToken(): string {
-  const exp = Date.now() + TOKEN_EXPIRY_MS;
-  const payload = `admin:${exp}`;
-  const sig = crypto
-    .createHmac('sha256', getTokenSecret())
-    .update(payload)
-    .digest('hex');
-  return `${exp}.${sig}`;
+export function createJwt(email: string): string {
+  return jwt.sign({ email }, getJwtSecret(), { expiresIn: JWT_EXPIRY });
 }
 
-export function verifySessionToken(token: string): boolean {
+export function verifyJwt(token: string): { email: string } | null {
   try {
-    const dotIndex = token.indexOf('.');
-    if (dotIndex === -1) return false;
-
-    const expStr = token.substring(0, dotIndex);
-    const sig = token.substring(dotIndex + 1);
-    const exp = parseInt(expStr, 10);
-
-    if (isNaN(exp) || Date.now() > exp) return false;
-
-    const payload = `admin:${expStr}`;
-    const expectedSig = crypto
-      .createHmac('sha256', getTokenSecret())
-      .update(payload)
-      .digest('hex');
-
-    // Timing-safe comparison
-    if (sig.length !== expectedSig.length) return false;
-    return crypto.timingSafeEqual(
-      Buffer.from(sig, 'hex'),
-      Buffer.from(expectedSig, 'hex')
-    );
+    const payload = jwt.verify(token, getJwtSecret()) as { email: string };
+    if (!payload.email) return null;
+    return { email: payload.email };
   } catch {
-    return false;
+    return null;
   }
 }
 
-// --- Admin config helpers ---
+// --- Extract + verify from Authorization header ---
 
-export async function getAdminConfig(supabase: SupabaseClient) {
+export function extractBearerToken(authHeader: string | undefined): string | null {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  return authHeader.slice(7);
+}
+
+export async function authenticateRequest(
+  authHeader: string | undefined,
+  supabase: SupabaseClient
+): Promise<{ email: string } | null> {
+  const token = extractBearerToken(authHeader);
+  if (!token) return null;
+
+  const payload = verifyJwt(token);
+  if (!payload) return null;
+
+  // Verify the email still exists in admins table
+  const admin = await getAdminByEmail(supabase, payload.email);
+  if (!admin) return null;
+
+  return { email: payload.email };
+}
+
+// --- Admin helpers ---
+
+export async function getAdminByEmail(supabase: SupabaseClient, email: string) {
   const { data } = await supabase
-    .from('admin_config')
-    .select('id, password_hash')
+    .from('admins')
+    .select('id, email, password_hash')
+    .eq('email', email)
+    .single();
+  return data;
+}
+
+export async function getAnyAdmin(supabase: SupabaseClient) {
+  const { data } = await supabase
+    .from('admins')
+    .select('id, email')
     .limit(1)
     .single();
   return data;
 }
 
-export async function setAdminPassword(supabase: SupabaseClient, password: string) {
+export async function createAdmin(supabase: SupabaseClient, email: string, password: string) {
   const hash = await hashPassword(password);
+  const { error } = await supabase
+    .from('admins')
+    .insert({ email, password_hash: hash });
+  if (error) throw error;
+}
 
-  // Upsert: update if exists, insert if not
-  const existing = await getAdminConfig(supabase);
-  if (existing) {
-    const { error } = await supabase
-      .from('admin_config')
-      .update({ password_hash: hash, updated_at: new Date().toISOString() })
-      .eq('id', existing.id);
-    if (error) throw error;
-  } else {
-    const { error } = await supabase
-      .from('admin_config')
-      .insert({ password_hash: hash });
-    if (error) throw error;
-  }
+export async function updateAdminPassword(supabase: SupabaseClient, email: string, password: string) {
+  const hash = await hashPassword(password);
+  const { error } = await supabase
+    .from('admins')
+    .update({ password_hash: hash, updated_at: new Date().toISOString() })
+    .eq('email', email);
+  if (error) throw error;
 }
 
 // --- URL validation ---
