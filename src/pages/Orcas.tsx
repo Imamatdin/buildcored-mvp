@@ -68,7 +68,7 @@ export default function Orcas() {
                 className="bg-white/[0.03] rounded-xl p-4 text-center border border-white/[0.04]"
               >
                 <stat.icon className="h-4 w-4 text-white/25 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-foreground stat-number">
+                <div className="text-xl font-bold text-foreground stat-number">
                   {stat.value}
                 </div>
                 <div className="text-xs text-white/35">{stat.label}</div>

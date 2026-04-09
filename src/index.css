@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Press+Start+2P&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -141,7 +141,8 @@
   opacity: 1;
 }
 
-/* Stat counter pulse */
+/* Pixel font for stat numbers */
 .stat-number {
+  font-family: 'Press Start 2P', cursive;
   font-variant-numeric: tabular-nums;
 }

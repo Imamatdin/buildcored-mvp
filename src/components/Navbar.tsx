@@ -15,13 +15,13 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50">
       <div className="border-b border-white/[0.06] bg-black/70 backdrop-blur-lg">
-        <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-14">
+        <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="shrink-0">
             <img
               src="/logo.svg"
               alt="Buildcored"
-              className="h-10 w-auto opacity-90 hover:opacity-100 transition"
+              className="h-14 w-auto opacity-90 hover:opacity-100 transition"
             />
           </Link>
 
@@ -64,7 +64,7 @@ export default function Navbar() {
 
       {/* Mobile overlay */}
       {open && (
-        <div className="md:hidden fixed inset-0 top-14 bg-black/95 backdrop-blur-lg">
+        <div className="md:hidden fixed inset-0 top-16 bg-black/95 backdrop-blur-lg">
           <div className="flex flex-col px-6 py-8 gap-1">
             {NAV_LINKS.map((link) => (
               <Link
