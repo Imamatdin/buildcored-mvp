@@ -1,165 +1,323 @@
-import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Zap, Shield, Eye, Trophy } from "lucide-react";
-import ScrollArrow from "@/components/ScrollArrow";
+import {
+  ArrowRight,
+  Star,
+  Sparkles,
+  Cpu,
+  Calendar,
+  Clock,
+  CloudOff,
+  Terminal,
+  Zap,
+} from "lucide-react";
+import { useShowcaseProjects } from "@/hooks/useShowcaseProjects";
+import ProjectCard, { ProjectCardSkeleton } from "@/components/ProjectCard";
+import SplashOverlay from "@/components/SplashOverlay";
+
+const ORCAS_WEEKS = [
+  { week: 1, title: "Body as Input", desc: "Eyes, fingers, head, and breath become sensors" },
+  { week: 2, title: "Local AI Core", desc: "Run intelligence entirely on-device" },
+  { week: 3, title: "Signals & Systems", desc: "FFT, filters, PWM, I2C, DAQ" },
+  { week: 4, title: "Full Systems", desc: "Real pipelines: sensor in, model out" },
+];
 
 const Index = () => {
-  const secondSectionRef = useRef<HTMLElement>(null);
-
-  const scrollToSecondSection = () => {
-    secondSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const { featured, recent, isLoading } = useShowcaseProjects();
 
   return (
-    <main className="h-screen overflow-y-auto snap-y snap-mandatory relative">
-      {/* Hero Section */}
-      <section className="h-screen snap-start flex flex-col relative shrink-0">
-        {/* Logo at top - absolute so it doesn't affect text centering */}
-        <div className="absolute top-8 left-0 right-0 px-6 flex justify-center">
-          <img src="/logo.svg" alt="Buildcored" className="h-16 md:h-20 w-auto" />
-        </div>
+    <>
+      <SplashOverlay />
 
-        {/* Center Text - vertically centered */}
-        <div className="flex-1 flex items-center justify-center px-6">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-light text-center max-w-4xl leading-tight tracking-tight">
-            <span className="text-muted-foreground">open source for</span>
-            <br />
-            <span className="text-foreground font-medium">
-              creative engineering
-            </span>
-          </h1>
-        </div>
+      <main className="min-h-screen">
+        {/* ── Hero ── */}
+        <section className="pt-32 pb-24 px-6 relative overflow-hidden">
+          {/* Subtle grid pattern background */}
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
+              backgroundSize: "40px 40px",
+            }}
+          />
 
-        {/* Scroll Arrow - Bottom Center */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
-          <ScrollArrow onClick={scrollToSecondSection} />
-        </div>
-      </section>
+          <div className="max-w-4xl mx-auto text-center relative">
+            <div className="fade-in-up">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-xs text-white/50 mb-8">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                ORCAS v1.5 is live — 30 day challenge running now
+              </div>
+            </div>
 
-      {/* Engineers Section - from buildcored-mvp.vercel.app/engineers */}
-      <section
-        ref={secondSectionRef}
-        className="min-h-screen snap-start shrink-0 py-16"
-      >
-        <div className="max-w-5xl mx-auto px-6">
-          {/* Hero */}
-          <header className="mb-16 text-center">
-            <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
-              Show companies{" "}
-              <span className="text-primary">how you think</span>
+            <h1
+              className="fade-in-up text-4xl md:text-6xl lg:text-7xl font-light leading-[1.1] tracking-tight mb-6 glow-text"
+              style={{ animationDelay: "0.1s" }}
+            >
+              <span className="text-white/50">open source for</span>
+              <br />
+              <span className="text-foreground font-semibold">
+                creative engineering
+              </span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Tired of resume black holes? Skip the keyword games. Solve a real
-              engineering problem and let your reasoning speak for itself.
-            </p>
-            <Link
-              to="/problems"
-              className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-black bg-white hover:bg-white/90 transition"
+
+            <p
+              className="fade-in-up text-base md:text-lg text-white/40 max-w-lg mx-auto mb-10 leading-relaxed"
+              style={{ animationDelay: "0.2s" }}
             >
-              View All Problems
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </header>
-
-          {/* Value Props */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            <div className="bg-card border border-border rounded-lg p-6">
-              <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
-                <Eye className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Anonymous by Default
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Companies see your problem-solving, not your name, school, or past
-                companies. Get judged on merit, not pedigree.
-              </p>
-            </div>
-
-            <div className="bg-card border border-border rounded-lg p-6">
-              <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
-                <Zap className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                15-25 Minutes, Not 6 Hours
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                No multi-day take-homes. One realistic scenario, your best thinking.
-                That's it.
-              </p>
-            </div>
-
-            <div className="bg-card border border-border rounded-lg p-6">
-              <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
-                <Trophy className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Real Problems, Not Puzzles
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                These are scenarios you'll actually face on the job—production
-                issues, stakeholder conflicts, technical tradeoffs.
-              </p>
-            </div>
-
-            <div className="bg-card border border-border rounded-lg p-6">
-              <div className="p-3 rounded-lg bg-secondary text-white/70 w-fit mb-4">
-                <Shield className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                You Control Your Data
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Choose public, unlisted, or private visibility. Companies only get
-                your email if you accept their interview request.
-              </p>
-            </div>
-          </section>
-
-          {/* Tracks */}
-          <section className="mb-16 text-center">
-            <h2 className="text-2xl font-bold text-foreground mb-6">
-              Problems for Every Track
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              We have problems for 10 different engineering roles. Pick the one
-              that matches your expertise.
+              Build projects. Learn by doing. Join a community of creative
+              engineers shipping real work.
             </p>
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
-              {[
-                { name: "Backend", id: 1 },
-                { name: "Frontend", id: 2 },
-                { name: "SRE/DevOps", id: 3 },
-                { name: "Mobile", id: 4 },
-                { name: "Data/ML", id: 5 },
-                { name: "Security", id: 6 },
-                { name: "QA/Test", id: 7 },
-                { name: "Eng Manager", id: 8 },
-                { name: "Junior", id: 9 },
-                { name: "Product", id: 10 },
-              ].map((track) => (
+
+            <div
+              className="fade-in-up flex flex-col sm:flex-row gap-3 justify-center"
+              style={{ animationDelay: "0.3s" }}
+            >
+              <Link
+                to="/orcas"
+                className="inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium text-black bg-white hover:bg-white/90 transition-all hover:shadow-lg hover:shadow-white/10"
+              >
+                Join ORCAS Challenge
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/showcase"
+                className="inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium text-white/70 border border-white/15 hover:border-white/30 hover:text-white transition-all"
+              >
+                Browse Projects
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ── ORCAS Spotlight ── */}
+        <section className="pb-24 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="relative rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-transparent p-8 md:p-12 overflow-hidden">
+              {/* Corner accent */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-white/[0.03] to-transparent rounded-bl-full" />
+
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 rounded-lg bg-white/[0.06]">
+                    <Cpu className="h-5 w-5 text-white/60" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                      BUILDCORED ORCAS
+                    </h2>
+                    <p className="text-xs text-white/40 font-mono tracking-wider">
+                      v1.5 — LIVE NOW
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-white/50 max-w-2xl mb-8 leading-relaxed">
+                  30 days. 30 projects. Zero hardware required. Learn hardware
+                  engineering thinking through software projects you can run on
+                  any laptop.
+                </p>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                  {[
+                    { icon: Calendar, value: "30", label: "Projects" },
+                    { icon: Zap, value: "4", label: "Weeks" },
+                    { icon: Clock, value: "~1h", label: "Per Day" },
+                    { icon: CloudOff, value: "0", label: "Cloud Deps" },
+                  ].map((stat) => (
+                    <div
+                      key={stat.label}
+                      className="bg-white/[0.03] rounded-xl p-4 text-center border border-white/[0.04]"
+                    >
+                      <stat.icon className="h-4 w-4 text-white/30 mx-auto mb-2" />
+                      <div className="text-2xl font-bold text-foreground stat-number">
+                        {stat.value}
+                      </div>
+                      <div className="text-xs text-white/40 mt-0.5">
+                        {stat.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Week overview */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-8">
+                  {ORCAS_WEEKS.map((w) => (
+                    <div
+                      key={w.week}
+                      className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]"
+                    >
+                      <span className="text-xs font-mono text-white/30 mt-0.5 shrink-0">
+                        W{w.week}
+                      </span>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">
+                          {w.title}
+                        </p>
+                        <p className="text-xs text-white/35 mt-0.5">
+                          {w.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link
+                    to="/orcas"
+                    className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-black bg-white hover:bg-white/90 transition"
+                  >
+                    View Full Curriculum
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <div className="flex items-center gap-2 text-xs text-white/30 px-4">
+                    <Terminal className="h-3.5 w-3.5" />
+                    Works on Mac, Windows, and Linux
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Recent Projects ── */}
+        <section className="pb-24 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="h-5 w-5 text-white/30" />
+                <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                  Recent Projects
+                </h2>
+              </div>
+              <Link
+                to="/showcase"
+                className="text-sm text-white/40 hover:text-white inline-flex items-center gap-1 transition group"
+              >
+                View all
+                <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+
+            {isLoading && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {[1, 2, 3].map((i) => (
+                  <ProjectCardSkeleton key={i} />
+                ))}
+              </div>
+            )}
+
+            {!isLoading && recent.length === 0 && (
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 text-center">
+                <Sparkles className="h-8 w-8 text-white/15 mx-auto mb-3" />
+                <p className="text-sm text-white/40">
+                  Projects are being curated. Check back soon.
+                </p>
+              </div>
+            )}
+
+            {!isLoading && recent.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {recent.slice(0, 6).map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ── Featured This Week ── */}
+        <section className="pb-24 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="border-t border-white/[0.06] pt-16">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-2.5">
+                  <Star className="h-5 w-5 text-white/30" />
+                  <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                    Featured This Week
+                  </h2>
+                </div>
                 <Link
-                  key={track.id}
-                  to={`/problem/${track.id}`}
-                  className="px-4 py-2 rounded-full bg-secondary text-sm text-foreground hover:bg-secondary/80 transition"
+                  to="/showcase"
+                  className="text-sm text-white/40 hover:text-white inline-flex items-center gap-1 transition group"
                 >
-                  {track.name}
+                  View showcase
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
-              ))}
+              </div>
+
+              {isLoading && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {[1, 2].map((i) => (
+                    <ProjectCardSkeleton key={i} />
+                  ))}
+                </div>
+              )}
+
+              {!isLoading && featured.length === 0 && (
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 text-center">
+                  <Star className="h-8 w-8 text-white/15 mx-auto mb-3" />
+                  <p className="text-sm text-white/40">
+                    Featured projects are selected weekly. Stay tuned.
+                  </p>
+                </div>
+              )}
+
+              {!isLoading && featured.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="md:col-span-2">
+                    <ProjectCard project={featured[0]} />
+                  </div>
+                  {featured.slice(1, 3).map((project) => (
+                    <ProjectCard key={project.id} project={project} />
+                  ))}
+                </div>
+              )}
             </div>
-            <Link
-              to="/problems"
-              className="text-white/60 hover:text-white hover:underline text-sm inline-flex items-center gap-1"
-            >
-              View all problems
-              <ArrowRight className="h-3 w-3" />
-            </Link>
-          </section>
+          </div>
+        </section>
 
-        </div>
-      </section>
-
-    </main>
+        {/* ── CTA ── */}
+        <section className="pb-24 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="relative rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-10 md:p-16 text-center overflow-hidden">
+              <div
+                className="absolute inset-0 opacity-[0.02]"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
+                  backgroundSize: "32px 32px",
+                }}
+              />
+              <div className="relative">
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+                  Ready to start building?
+                </h2>
+                <p className="text-white/40 mb-8 max-w-md mx-auto">
+                  Join the BUILDCORED community. Ship projects, showcase your
+                  work, level up.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link
+                    to="/orcas"
+                    className="inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium text-black bg-white hover:bg-white/90 transition-all hover:shadow-lg hover:shadow-white/10"
+                  >
+                    Join ORCAS Challenge
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    to="/showcase"
+                    className="inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium text-white/60 border border-white/15 hover:border-white/30 hover:text-white transition-all"
+                  >
+                    Browse Projects
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
   );
 };
 

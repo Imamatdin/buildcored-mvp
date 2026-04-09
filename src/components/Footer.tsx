@@ -13,18 +13,13 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link to="/problems" className="text-sm text-white/50 hover:text-white transition">
-                  Problems
+                <Link to="/orcas" className="text-sm text-white/50 hover:text-white transition">
+                  ORCAS Challenge
                 </Link>
               </li>
               <li>
                 <Link to="/showcase" className="text-sm text-white/50 hover:text-white transition">
                   Showcase
-                </Link>
-              </li>
-              <li>
-                <Link to="/companies" className="text-sm text-white/50 hover:text-white transition">
-                  For Companies
                 </Link>
               </li>
             </ul>
@@ -57,7 +52,7 @@ export default function Footer() {
           {/* Newsletter */}
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-white/30 mb-4">
-              Stay Updated
+              Join the Community
             </h4>
             <form
               action="https://buttondown.com/api/emails/embed-subscribe/buildcored"

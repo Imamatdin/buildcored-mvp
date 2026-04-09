@@ -11,6 +11,7 @@ import Problems from "./pages/Problems";
 import Problem from "./pages/Problem";
 import About from "./pages/About";
 import Showcase from "./pages/Showcase";
+import Orcas from "./pages/Orcas";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -23,20 +24,19 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Landing page — no navbar/footer */}
-          <Route path="/" element={<Index />} />
-
           {/* Admin — no navbar/footer */}
           <Route path="/admin" element={<Admin />} />
 
-          {/* All other pages get navbar + footer */}
+          {/* All pages get navbar + footer */}
           <Route element={<Layout />}>
+            <Route path="/" element={<Index />} />
             <Route path="/companies" element={<Companies />} />
             <Route path="/company/:token" element={<CompanyView />} />
             <Route path="/problems" element={<Problems />} />
             <Route path="/problem/:id" element={<Problem />} />
             <Route path="/about" element={<About />} />
             <Route path="/showcase" element={<Showcase />} />
+            <Route path="/orcas" element={<Orcas />} />
           </Route>
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

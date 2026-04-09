@@ -3,9 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ArrowRight } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Problems", href: "/problems" },
+  { label: "ORCAS", href: "/orcas" },
   { label: "Showcase", href: "/showcase" },
-  { label: "Companies", href: "/companies" },
   { label: "About", href: "/about" },
 ];
 
@@ -45,10 +44,10 @@ export default function Navbar() {
             ))}
 
             <Link
-              to="/problems"
+              to="/orcas"
               className="ml-4 inline-flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition"
             >
-              Apply
+              Join ORCAS
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -83,11 +82,11 @@ export default function Navbar() {
             ))}
             <div className="mt-6 pt-6 border-t border-white/10">
               <Link
-                to="/problems"
+                to="/orcas"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center gap-2 py-3 text-sm font-medium rounded-full border border-white/20 text-white hover:bg-white hover:text-black transition"
               >
-                Apply
+                Join ORCAS
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>

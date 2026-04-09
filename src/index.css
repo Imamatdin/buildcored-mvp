@@ -80,3 +80,68 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
   }
 }
+
+/* Splash screen */
+.splash-overlay {
+  animation: splashReveal 2.2s ease-in-out forwards;
+}
+
+.splash-logo {
+  animation: splashLogoIn 0.8s ease-out 0.1s both;
+}
+
+.splash-tagline {
+  animation: splashLogoIn 0.8s ease-out 0.4s both;
+}
+
+@keyframes splashReveal {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+@keyframes splashLogoIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade-in-up for page sections */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.7s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Subtle glow effect */
+.glow-text {
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.06);
+}
+
+/* Animated border glow for cards */
+.card-glow {
+  position: relative;
+}
+
+.card-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent, rgba(255,255,255,0.04));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card-glow:hover::before {
+  opacity: 1;
+}
+
+/* Stat counter pulse */
+.stat-number {
+  font-variant-numeric: tabular-nums;
+}
