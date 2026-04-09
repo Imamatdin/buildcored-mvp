@@ -166,10 +166,16 @@ export default function Admin() {
 
       // Check if admin is configured
       const statusRes = await fetch("/api/admin/status");
+      if (!statusRes.ok) {
+        const text = await statusRes.text();
+        setError(`Server error (${statusRes.status}): ${text.slice(0, 100)}`);
+        setLoading(false);
+        return;
+      }
       const { configured } = await statusRes.json();
       setView(configured ? "login" : "setup");
-    } catch {
-      setError("Could not connect to server");
+    } catch (e: any) {
+      setError(e.message || "Could not connect to server");
     }
     setLoading(false);
   }
