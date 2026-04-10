@@ -4,7 +4,7 @@ import {
   getAnyAdmin,
   createAdmin,
   createJwt,
-} from '../../lib/admin-auth';
+} from '../_lib/admin-auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {

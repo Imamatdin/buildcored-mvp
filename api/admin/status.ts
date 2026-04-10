@@ -19,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Lazy-import so module-load errors land in this catch, not in FUNCTION_INVOCATION_FAILED
     const { createSupabaseClient, authenticateRequest, getAnyAdmin } = await import(
-      '../../lib/admin-auth'
+      '../_lib/admin-auth'
     );
 
     const supabase = createSupabaseClient();
