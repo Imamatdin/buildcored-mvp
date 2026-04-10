@@ -1,4 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import {
+  createSupabaseClient,
+  authenticateRequest,
+  getAnyAdmin,
+} from '../_lib/admin-auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -17,11 +22,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Lazy-import so module-load errors land in this catch, not in FUNCTION_INVOCATION_FAILED
-    const { createSupabaseClient, authenticateRequest, getAnyAdmin } = await import(
-      '../_lib/admin-auth'
-    );
-
     const supabase = createSupabaseClient();
 
     const authHeader = req.headers.authorization;
