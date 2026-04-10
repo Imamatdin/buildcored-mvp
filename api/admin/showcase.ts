@@ -1,14 +1,63 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import {
-  createSupabaseClient,
-  authenticateRequest,
-  validateShowcaseUrls,
-} from './_auth';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
+
+function isValidUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
+function validateShowcaseUrls(body: Record<string, any>): string | null {
+  for (const field of ['image_url', 'repo_url', 'live_url']) {
+    if (body[field] && !isValidUrl(body[field])) {
+      return `Invalid URL for ${field}`;
+    }
+  }
+  return null;
+}
+
+async function authenticate(
+  authHeader: string | undefined,
+  supabase: SupabaseClient
+): Promise<{ email: string } | null> {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  try {
+    const payload = jwt.verify(
+      authHeader.slice(7),
+      process.env.JWT_SECRET!
+    ) as { email: string };
+    if (!payload.email) return null;
+    const { data } = await supabase
+      .from('admins')
+      .select('id, email')
+      .eq('email', payload.email)
+      .single();
+    if (!data) return null;
+    return { email: payload.email };
+  } catch {
+    return null;
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const missing: string[] = [];
+  if (!process.env.SUPABASE_URL) missing.push('SUPABASE_URL');
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+  if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
+  if (missing.length > 0) {
+    return res.status(500).json({ error: `Missing env vars: ${missing.join(', ')}` });
+  }
+
   try {
-    const supabase = createSupabaseClient();
-    const auth = await authenticateRequest(req.headers.authorization, supabase);
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const auth = await authenticate(req.headers.authorization, supabase);
     if (!auth) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -88,6 +137,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (e: any) {
     console.error('Admin showcase error:', e);
-    return res.status(500).json({ error: e.message || 'Server error' });
+    return res.status(500).json({ error: e?.message || 'Server error' });
   }
 }

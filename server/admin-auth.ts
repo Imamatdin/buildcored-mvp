@@ -18,8 +18,6 @@ export function createSupabaseClient(): SupabaseClient {
   );
 }
 
-// --- Password hashing ---
-
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, BCRYPT_ROUNDS);
 }
@@ -27,8 +25,6 @@ export async function hashPassword(password: string): Promise<string> {
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
-
-// --- JWT sessions ---
 
 export function createJwt(email: string): string {
   return jwt.sign({ email }, getJwtSecret(), { expiresIn: JWT_EXPIRY });
@@ -43,8 +39,6 @@ export function verifyJwt(token: string): { email: string } | null {
     return null;
   }
 }
-
-// --- Extract + verify from Authorization header ---
 
 export function extractBearerToken(authHeader: string | undefined): string | null {
   if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
@@ -61,14 +55,11 @@ export async function authenticateRequest(
   const payload = verifyJwt(token);
   if (!payload) return null;
 
-  // Verify the email still exists in admins table
   const admin = await getAdminByEmail(supabase, payload.email);
   if (!admin) return null;
 
   return { email: payload.email };
 }
-
-// --- Admin helpers ---
 
 export async function getAdminByEmail(supabase: SupabaseClient, email: string) {
   const { data } = await supabase
@@ -104,8 +95,6 @@ export async function updateAdminPassword(supabase: SupabaseClient, email: strin
     .eq('email', email);
   if (error) throw error;
 }
-
-// --- URL validation ---
 
 export function isValidUrl(url: string): boolean {
   try {
