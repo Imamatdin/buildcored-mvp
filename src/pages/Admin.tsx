@@ -13,7 +13,9 @@ import {
   Settings,
   ArrowLeft,
   KeyRound,
+  ImageIcon,
 } from "lucide-react";
+import ProjectCard from "@/components/ProjectCard";
 
 // --- Types ---
 
@@ -672,13 +674,11 @@ export default function Admin() {
 
         {/* Form Modal */}
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-            <form
-              onSubmit={handleSubmit}
-              className="w-full max-w-xl bg-card border border-border rounded-lg p-6 max-h-[90vh] overflow-y-auto"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-foreground">
+          <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-md px-4 py-8 overflow-y-auto">
+            <div className="w-full max-w-5xl bg-card border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+                <h2 className="text-base font-semibold text-foreground">
                   {editingId ? "Edit Project" : "Add New Project"}
                 </h2>
                 <button
@@ -687,173 +687,213 @@ export default function Admin() {
                     setShowForm(false);
                     setEditingId(null);
                   }}
-                  className="p-1 hover:bg-secondary rounded transition"
+                  className="p-1.5 rounded-md hover:bg-white/5 text-muted-foreground hover:text-foreground transition"
                 >
-                  <X className="h-5 w-5 text-muted-foreground" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Title *
-                  </label>
-                  <input
-                    required
-                    value={form.title}
-                    onChange={(e) =>
-                      setForm({ ...form, title: e.target.value })
-                    }
-                    className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
-                    placeholder="My Awesome Project"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Description *
-                  </label>
-                  <textarea
-                    required
-                    rows={3}
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm({ ...form, description: e.target.value })
-                    }
-                    className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30 resize-none"
-                    placeholder="A brief description of the project..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Image URL
-                  </label>
-                  <input
-                    value={form.image_url}
-                    onChange={(e) =>
-                      setForm({ ...form, image_url: e.target.value })
-                    }
-                    className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
-                    placeholder="https://example.com/screenshot.png"
-                  />
-                  {form.image_url && (
-                    <img
-                      src={form.image_url}
-                      alt="Preview"
-                      className="mt-2 rounded-lg h-32 object-cover border border-border"
-                      onError={(e) =>
-                        ((e.target as HTMLImageElement).style.display = "none")
-                      }
-                    />
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              {/* 2-column body */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(320px,400px)] divide-y lg:divide-y-0 lg:divide-x divide-white/[0.06]">
+                {/* Left: form */}
+                <form
+                  onSubmit={handleSubmit}
+                  id="project-form"
+                  className="p-6 space-y-5"
+                >
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Repo URL
+                    <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
+                      Title *
                     </label>
                     <input
-                      value={form.repo_url}
+                      required
+                      value={form.title}
                       onChange={(e) =>
-                        setForm({ ...form, repo_url: e.target.value })
+                        setForm({ ...form, title: e.target.value })
                       }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
-                      placeholder="https://github.com/..."
+                      className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-foreground placeholder:text-white/25 focus:outline-none focus:border-white/30 transition"
+                      placeholder="My Awesome Project"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Live URL
-                    </label>
-                    <input
-                      value={form.live_url}
-                      onChange={(e) =>
-                        setForm({ ...form, live_url: e.target.value })
-                      }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
-                      placeholder="https://myproject.com"
-                    />
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Author
+                    <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
+                      Description *
                     </label>
-                    <input
-                      value={form.author_name}
+                    <textarea
+                      required
+                      rows={5}
+                      value={form.description}
                       onChange={(e) =>
-                        setForm({ ...form, author_name: e.target.value })
+                        setForm({ ...form, description: e.target.value })
                       }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
-                      placeholder="Jane Doe"
+                      className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-foreground placeholder:text-white/25 focus:outline-none focus:border-white/30 transition resize-none"
+                      placeholder="What does this project do? Why is it interesting? Newlines are preserved in the detail view."
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Tags
-                    </label>
-                    <input
-                      value={form.tags}
-                      onChange={(e) =>
-                        setForm({ ...form, tags: e.target.value })
-                      }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
-                      placeholder="React, TypeScript, AI"
-                    />
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-6">
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Display Order
+                  <div>
+                    <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
+                      Image / Screenshot URL
                     </label>
                     <input
-                      type="number"
-                      value={form.display_order}
+                      value={form.image_url}
                       onChange={(e) =>
-                        setForm({
-                          ...form,
-                          display_order: parseInt(e.target.value) || 0,
-                        })
+                        setForm({ ...form, image_url: e.target.value })
                       }
-                      className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground focus:outline-none focus:ring-1 focus:ring-white/30"
+                      className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-foreground placeholder:text-white/25 focus:outline-none focus:border-white/30 transition"
+                      placeholder="https://example.com/screenshot.png"
                     />
+                    <p className="text-[11px] text-white/30 mt-1.5">
+                      Paste a direct image URL. The preview on the right
+                      updates live.
+                    </p>
                   </div>
-                  <label className="flex items-center gap-2 cursor-pointer pt-5">
-                    <input
-                      type="checkbox"
-                      checked={form.featured}
-                      onChange={(e) =>
-                        setForm({ ...form, featured: e.target.checked })
-                      }
-                      className="h-4 w-4 rounded border-border accent-white"
-                    />
-                    <span className="text-sm text-foreground flex items-center gap-1">
-                      <Star className="h-3 w-3 text-white/70" />
-                      Featured
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
+                        Repo URL
+                      </label>
+                      <input
+                        value={form.repo_url}
+                        onChange={(e) =>
+                          setForm({ ...form, repo_url: e.target.value })
+                        }
+                        className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-foreground placeholder:text-white/25 focus:outline-none focus:border-white/30 transition"
+                        placeholder="https://github.com/..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
+                        Live URL
+                      </label>
+                      <input
+                        value={form.live_url}
+                        onChange={(e) =>
+                          setForm({ ...form, live_url: e.target.value })
+                        }
+                        className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-foreground placeholder:text-white/25 focus:outline-none focus:border-white/30 transition"
+                        placeholder="https://myproject.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
+                        Author
+                      </label>
+                      <input
+                        value={form.author_name}
+                        onChange={(e) =>
+                          setForm({ ...form, author_name: e.target.value })
+                        }
+                        className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-foreground placeholder:text-white/25 focus:outline-none focus:border-white/30 transition"
+                        placeholder="Jane Doe"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
+                        Tags (comma-separated)
+                      </label>
+                      <input
+                        value={form.tags}
+                        onChange={(e) =>
+                          setForm({ ...form, tags: e.target.value })
+                        }
+                        className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-foreground placeholder:text-white/25 focus:outline-none focus:border-white/30 transition"
+                        placeholder="React, TypeScript, AI"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-end gap-6">
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-1.5">
+                        Display Order
+                      </label>
+                      <input
+                        type="number"
+                        value={form.display_order}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            display_order: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-foreground focus:outline-none focus:border-white/30 transition"
+                      />
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer pb-2.5">
+                      <input
+                        type="checkbox"
+                        checked={form.featured}
+                        onChange={(e) =>
+                          setForm({ ...form, featured: e.target.checked })
+                        }
+                        className="h-4 w-4 rounded border-border accent-white"
+                      />
+                      <span className="text-sm text-foreground flex items-center gap-1">
+                        <Star className="h-3 w-3 text-white/70" />
+                        Featured
+                      </span>
+                    </label>
+                  </div>
+                </form>
+
+                {/* Right: live preview */}
+                <div className="bg-black/40 p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <ImageIcon className="h-3.5 w-3.5 text-white/40" />
+                    <span className="text-xs font-medium text-white/50 uppercase tracking-wider">
+                      Live Preview
                     </span>
-                  </label>
+                  </div>
+                  <p className="text-[11px] text-white/30 mb-4">
+                    This is exactly how your project will appear in the
+                    showcase grid.
+                  </p>
+                  <ProjectCard
+                    project={{
+                      id: "preview",
+                      title: form.title || "Project Title",
+                      description:
+                        form.description ||
+                        "Your description will appear here. Make it punchy and clear.",
+                      image_url: form.image_url || null,
+                      repo_url: form.repo_url || null,
+                      live_url: form.live_url || null,
+                      tags: form.tags
+                        .split(",")
+                        .map((t) => t.trim())
+                        .filter(Boolean),
+                      author_name: form.author_name || null,
+                      featured: form.featured,
+                    }}
+                  />
+                  <p className="text-[11px] text-white/30 mt-4 text-center">
+                    Visitors can click the card to see the full description
+                    and image in detail view.
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-border">
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.06] bg-black/20">
                 <button
                   type="button"
                   onClick={() => {
                     setShowForm(false);
                     setEditingId(null);
                   }}
-                  className="px-4 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+                  className="px-4 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
+                  form="project-form"
                   disabled={saving}
                   className="px-6 py-2 rounded-lg bg-white text-black text-sm font-medium hover:bg-white/90 transition disabled:opacity-50"
                 >
@@ -861,10 +901,10 @@ export default function Admin() {
                     ? "Saving..."
                     : editingId
                     ? "Save Changes"
-                    : "Add Project"}
+                    : "Publish Project"}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         )}
 

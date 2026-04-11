@@ -42,11 +42,10 @@ export default function Orcas() {
           </div>
 
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4 tracking-tight">
-            BUILDCORED{" "}
-            <span className="text-white/40 font-light">ORCAS</span>
+            BUILDCORED <span className="text-white/40">ORCAS</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-white/40 max-w-2xl mx-auto mb-6 leading-relaxed">
+          <p className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-6 leading-relaxed">
             30 Days. 30 Projects. Zero Hardware Required.
           </p>
 
@@ -162,7 +161,7 @@ export default function Orcas() {
                 },
               ].map((item) => (
                 <div key={item.step} className="text-center">
-                  <div className="text-2xl font-bold text-white/15 font-mono mb-3">
+                  <div className="text-xl font-bold text-white/20 stat-number mb-4">
                     {item.step}
                   </div>
                   <h3 className="text-sm font-semibold text-foreground mb-2">

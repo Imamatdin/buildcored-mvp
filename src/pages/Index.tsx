@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -12,7 +13,9 @@ import {
 } from "lucide-react";
 import { useShowcaseProjects } from "@/hooks/useShowcaseProjects";
 import ProjectCard, { ProjectCardSkeleton } from "@/components/ProjectCard";
+import ProjectDetailModal from "@/components/ProjectDetailModal";
 import SplashOverlay from "@/components/SplashOverlay";
+import type { Project } from "@/types/showcase";
 
 const ORCAS_WEEKS = [
   { week: 1, title: "Body as Input", desc: "Eyes, fingers, head, and breath become sensors" },
@@ -23,6 +26,7 @@ const ORCAS_WEEKS = [
 
 const Index = () => {
   const { featured, recent, isLoading } = useShowcaseProjects();
+  const [selected, setSelected] = useState<Project | null>(null);
 
   return (
     <>
@@ -219,7 +223,11 @@ const Index = () => {
             {!isLoading && recent.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {recent.slice(0, 6).map((project) => (
-                  <ProjectCard key={project.id} project={project} />
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onClick={setSelected}
+                  />
                 ))}
               </div>
             )}
@@ -266,10 +274,14 @@ const Index = () => {
               {!isLoading && featured.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="md:col-span-2">
-                    <ProjectCard project={featured[0]} />
+                    <ProjectCard project={featured[0]} onClick={setSelected} />
                   </div>
                   {featured.slice(1, 3).map((project) => (
-                    <ProjectCard key={project.id} project={project} />
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onClick={setSelected}
+                    />
                   ))}
                 </div>
               )}
@@ -317,6 +329,11 @@ const Index = () => {
           </div>
         </section>
       </main>
+
+      <ProjectDetailModal
+        project={selected}
+        onClose={() => setSelected(null)}
+      />
     </>
   );
 };

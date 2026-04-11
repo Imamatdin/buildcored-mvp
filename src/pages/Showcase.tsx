@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Star } from "lucide-react";
 import { useShowcaseProjects } from "@/hooks/useShowcaseProjects";
 import ProjectCard, { ProjectCardSkeleton } from "@/components/ProjectCard";
+import ProjectDetailModal from "@/components/ProjectDetailModal";
+import type { Project } from "@/types/showcase";
 
 export default function Showcase() {
   const { projects, isLoading } = useShowcaseProjects();
+  const [selected, setSelected] = useState<Project | null>(null);
 
   return (
     <main className="min-h-screen">
@@ -46,12 +50,21 @@ export default function Showcase() {
           {!isLoading && projects.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onClick={setSelected}
+                />
               ))}
             </div>
           )}
         </div>
       </section>
+
+      <ProjectDetailModal
+        project={selected}
+        onClose={() => setSelected(null)}
+      />
     </main>
   );
 }
