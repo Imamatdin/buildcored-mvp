@@ -127,21 +127,21 @@ export default function About() {
           {/* CTA */}
           <section className="text-center">
             <h2 className="text-xl font-bold text-foreground mb-4">
-              Want to try it out?
+              Want to see what we're building?
             </h2>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/problems"
+                to="/showcase"
                 className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-black bg-white hover:bg-white/90 transition"
               >
-                View Problems
+                Browse Projects
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                to="/companies"
+                to="/orcas"
                 className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-foreground border border-border hover:bg-secondary transition"
               >
-                For Companies
+                ORCAS Challenge
               </Link>
             </div>
           </section>

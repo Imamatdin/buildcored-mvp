@@ -10,6 +10,9 @@ import {
   CloudOff,
   Terminal,
   Zap,
+  Mail,
+  Check,
+  Loader2,
 } from "lucide-react";
 import { useShowcaseProjects } from "@/hooks/useShowcaseProjects";
 import ProjectCard, { ProjectCardSkeleton } from "@/components/ProjectCard";
@@ -23,6 +26,62 @@ const ORCAS_WEEKS = [
   { week: 3, title: "Signals & Systems", desc: "FFT, filters, PWM, I2C, DAQ" },
   { week: 4, title: "Full Systems", desc: "Real pipelines: sensor in, model out" },
 ];
+
+const BUTTONDOWN_URL = "https://buttondown.com/api/emails/embed-subscribe/buildcored";
+
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus("loading");
+    try {
+      const form = new FormData();
+      form.append("email", email);
+      const res = await fetch(BUTTONDOWN_URL, { method: "POST", body: form });
+      if (!res.ok) throw new Error();
+      setStatus("ok");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  if (status === "ok") {
+    return (
+      <div className="flex items-center justify-center gap-2 text-sm text-green-400">
+        <Check className="h-4 w-4" />
+        You're in — we'll keep you posted.
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="max-w-sm mx-auto">
+      <div className="flex gap-2">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => { setEmail(e.target.value); setStatus("idle"); }}
+          placeholder="you@email.com"
+          className="flex-1 rounded-full px-5 py-3 text-sm bg-white/[0.05] border border-white/[0.1] text-white placeholder:text-white/30 focus:outline-none focus:border-white/25 transition"
+        />
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-black bg-white hover:bg-white/90 transition-all hover:shadow-lg hover:shadow-white/10 disabled:opacity-60"
+        >
+          {status === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Notify me"}
+        </button>
+      </div>
+      {status === "error" && (
+        <p className="text-xs text-red-400 mt-2">Something went wrong — try again.</p>
+      )}
+    </form>
+  );
+}
 
 const Index = () => {
   const { featured, recent, isLoading } = useShowcaseProjects();
@@ -289,40 +348,64 @@ const Index = () => {
           </div>
         </section>
 
-        {/* ── CTA ── */}
+        {/* ── Newsletter ── */}
         <section className="pb-24 px-6">
           <div className="max-w-5xl mx-auto">
-            <div className="relative rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-10 md:p-16 text-center overflow-hidden">
+            <div className="relative rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] via-transparent to-white/[0.02] overflow-hidden">
+              {/* Dot grid bg */}
               <div
-                className="absolute inset-0 opacity-[0.02]"
+                className="absolute inset-0 opacity-[0.03]"
                 style={{
                   backgroundImage:
                     "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
                   backgroundSize: "32px 32px",
                 }}
               />
-              <div className="relative">
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-                  Ready to start building?
-                </h2>
-                <p className="text-white/40 mb-8 max-w-md mx-auto">
-                  Join the BUILDCORED community. Ship projects, showcase your
-                  work, level up.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Link
-                    to="/orcas"
-                    className="inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium text-black bg-white hover:bg-white/90 transition-all hover:shadow-lg hover:shadow-white/10"
-                  >
-                    Join ORCAS Challenge
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link
-                    to="/showcase"
-                    className="inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium text-white/60 border border-white/15 hover:border-white/30 hover:text-white transition-all"
-                  >
-                    Browse Projects
-                  </Link>
+              {/* Glow accent */}
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/[0.03] rounded-full blur-3xl" />
+              <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-white/[0.02] rounded-full blur-2xl" />
+
+              <div className="relative grid grid-cols-1 md:grid-cols-2 gap-0">
+                {/* Left — copy */}
+                <div className="p-10 md:p-14 flex flex-col justify-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-xs text-white/50 w-fit mb-5">
+                    <Mail className="h-3 w-3" />
+                    Newsletter
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 leading-tight">
+                    This cohort's full.
+                    <br />
+                    <span className="text-white/40">Next one won't wait.</span>
+                  </h2>
+                  <p className="text-sm text-white/40 leading-relaxed mb-6 max-w-sm">
+                    Get showcase projects delivered to your inbox, plus early
+                    access when the next cohort drops.
+                  </p>
+                  <NewsletterForm />
+                </div>
+
+                {/* Right — visual preview */}
+                <div className="hidden md:flex flex-col justify-center items-center p-10 border-l border-white/[0.06]">
+                  <p className="text-[10px] font-mono text-white/20 tracking-widest uppercase mb-4">
+                    What you'll get
+                  </p>
+                  <div className="space-y-3 w-full max-w-xs">
+                    {[
+                      { label: "New cohort announcements", icon: Calendar },
+                      { label: "Weekly project spotlights", icon: Star },
+                      { label: "Community highlights", icon: Sparkles },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.05]"
+                      >
+                        <div className="p-2 rounded-lg bg-white/[0.05]">
+                          <item.icon className="h-3.5 w-3.5 text-white/40" />
+                        </div>
+                        <span className="text-xs text-white/50">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
